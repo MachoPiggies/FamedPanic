@@ -1,18 +1,26 @@
 settings:
+  bungee: false #If your server has anything to do with bungeecord, this being true will give you more placeholders
+  showTitle: true #Shows title to panicking players, config below
+  savePanicking: false #People who leave/rejoin after restart, will be kept in panic mode until they manually disable it
   defaultCooldown: -1 #Set to -1 to have no cooldown
+  allowStaffTeleport: true #This allows staff to teleport to panicking players through the /panicking command or the panic alert
 
 panic:
   disableMovement: true #Stops player from being able to move
   interaction:
     stopOpening: true #Stops player from being able to open inventories (chests, furnaces, etc)
-    stopDropping: true #Stops player from being able to drop items
-    stopPickup: true #Stops player from being able to pick up items
-    stopInventoryMoving: true #Stops player from being able to move items in their inventory
+    stopDropping: true #*Stops player from being able to drop items
+    stopPickup: true #*Stops player from being able to pick up items
+    stopInventoryMoving: true #*Stops player from being able to move items in their inventory
     stopWorldInteraction: true #Stops player from being able to break/place/use blocks/items
     
   combat:
     stopDamager: true #Stops player from being able to deal damage (Some plugins may bypass this)
     stopDamagee: true #Stops player from being able to take damage
-  stopCommands: #Stops player being able to use any of the following commands
+  stopCommands: #Stops player being able to use any of the following commands (WILL NOT STOP BUNGEE COMMANDS)
     - disabledcommandhere
   stopChat: false #Stops player being able to talk
+
+title:
+  title: '&c&lPANIC'
+  subtitle: '&eA staff member will be with you shortly!'
