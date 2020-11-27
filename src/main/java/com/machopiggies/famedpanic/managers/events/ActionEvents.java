@@ -1,6 +1,6 @@
 package com.machopiggies.famedpanic.managers.events;
 
-import com.machopiggies.famedpanic.managers.PanicManager;
+import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.command.Command;
@@ -14,16 +14,20 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class ActionEvents extends EventListener {
 
     @EventHandler
     private void onMove(PlayerMoveEvent event) {
-        if (PanicManager.panickingObj(event.getPlayer()) != null) {
-            if (Objects.requireNonNull(PanicManager.panickingObj(event.getPlayer())).location.distance(event.getTo()) > 0.2) {
+        if (Core.getPanicManager().panickingObj(event.getPlayer()) != null) {
+            event.getPlayer().setAllowFlight(true);
+            event.getPlayer().setFlying(true);
+            if (Objects.requireNonNull(Core.getPanicManager().panickingObj(event.getPlayer())).location.distance(event.getTo()) > 0.2) {
                 if (prefs.disableMovement) {
-                    event.getPlayer().teleport(Objects.requireNonNull(PanicManager.panickingObj(event.getPlayer())).location);
+                    event.getPlayer().teleport(Objects.requireNonNull(Core.getPanicManager().panickingObj(event.getPlayer())).location);
                 }
             }
         }
@@ -32,7 +36,7 @@ public class ActionEvents extends EventListener {
     @EventHandler
     private void onInventoryClick(InventoryClickEvent event) {
         if (event.getWhoClicked() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getWhoClicked())) {
+            if (Core.getPanicManager().panicking((Player) event.getWhoClicked())) {
                 if (prefs.stopInventoryMoving) {
                     event.setCancelled(true);
                 }
@@ -43,7 +47,7 @@ public class ActionEvents extends EventListener {
     @EventHandler
     private void onInventoryDrag(InventoryDragEvent event) {
         if (event.getWhoClicked() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getWhoClicked())) {
+            if (Core.getPanicManager().panicking((Player) event.getWhoClicked())) {
                 if (prefs.stopInventoryMoving) {
                     event.setCancelled(true);
                 }
@@ -54,33 +58,39 @@ public class ActionEvents extends EventListener {
     @EventHandler
     private void onEntityDamage(EntityDamageByEntityEvent event) {
         if (event.getDamager() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getDamager())) {
+            if (Core.getPanicManager().panicking((Player) event.getDamager())) {
                 if (prefs.stopDamager) {
                     event.setCancelled(true);
+                    Map<String, String> map = new HashMap<>();
+                    map.put("{%TARGET_NAME%}", event.getEntity().getName());
+                    map.put("{%TARGET_DISPLAYNAME%}", event.getEntity().getName());
+                    Message.send(event.getDamager(), msgs.noDamager, map);
                 }
             }
-            Message.send(event.getDamager(), msgs.noDamager);
         }
         if (event.getEntity() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getDamager())) {
+            if (Core.getPanicManager().panicking((Player) event.getEntity())) {
                 if (prefs.stopDamagee) {
                     event.setCancelled(true);
+                    Map<String, String> map = new HashMap<>();
+                    map.put("{%TARGET_NAME%}", event.getEntity().getName());
+                    map.put("{%TARGET_DISPLAYNAME%}", event.getEntity().getName());
+                    Message.send(event.getDamager(), msgs.noDamagee, map);
                 }
             }
-            Message.send(event.getDamager(), msgs.noDamagee);
         }
     }
 
     @EventHandler
     private void onToggleFlight(PlayerToggleFlightEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler
     private void onCommandReprocess(PlayerCommandPreprocessEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             boolean block = false;
             String cmd = event.getMessage().split(" ")[0];
             for (Command command : prefs.stopCommands) {
@@ -105,7 +115,7 @@ public class ActionEvents extends EventListener {
     @EventHandler
     private void onHungerLoss(FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getEntity())) {
+            if (Core.getPanicManager().panicking((Player) event.getEntity())) {
                 event.setCancelled(true);
             }
         }

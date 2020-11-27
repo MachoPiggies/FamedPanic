@@ -1,9 +1,19 @@
 settings:
   bungee: false #If your server has anything to do with bungeecord, this being true will give you more placeholders
   showTitle: true #Shows title to panicking players, config below
-  savePanicking: false #People who leave/rejoin after restart, will be kept in panic mode until they manually disable it
-  defaultCooldown: -1 #Set to -1 to have no cooldown
+  defaultCooldown: -1 #Set to -1 to have no cooldown, players with 'famedpanic.panic.cooldown.bypass' will bypass this cooldown
   allowStaffTeleport: true #This allows staff to teleport to panicking players through the /panicking command or the panic alert
+
+  #THIS IS BETA WHICH MEANS THERE COULD BE ISSUES SURROUNDING ITS USE
+  #This works by sending a player into vanish whilst in spectator mode
+  #This plugin does not have player vanishing capabilities, you will need an external plugin
+  #If you find any issues, please DM the plugin developer
+  usePanicInspector:
+    enabled: false
+    vanishCommand: 'vanish' # Do not put the '/' at the start of this
+    unvanishCommand: 'unvanish' # Do not put the '/' at the start of this
+    secondsUntilRemoval: 10 #This is the delay between a player exiting panic mode, to that kicking their inspectors out of inspector mode. Set to -1 to stop automatic removing
+    alertTarget: true #Sends alert.inspector-arrival to a panicking player once an inspector has arrived
 
 panic:
   disableMovement: true #Stops player from being able to move

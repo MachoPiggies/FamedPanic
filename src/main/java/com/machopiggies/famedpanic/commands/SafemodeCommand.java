@@ -8,8 +8,12 @@ import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class SafemodeCommand extends CommandManager {
 
@@ -44,6 +48,13 @@ public class SafemodeCommand extends CommandManager {
         return super.onCommand(sender, command, s, args);
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] args) {
+        List<String> completions = new ArrayList<>();
+        StringUtil.copyPartialMatches(args[0], Arrays.asList("on", "off"), completions);
+        Collections.sort(completions);
+        return completions;
+    }
+
     //todo auto update all files if some settings are missing
-    //todo tabcompleter for this command
 }

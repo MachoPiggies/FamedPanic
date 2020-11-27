@@ -2,6 +2,7 @@ package com.machopiggies.famedpanic;
 
 import com.machopiggies.famedpanic.commands.CommandManager;
 import com.machopiggies.famedpanic.managers.ContactManager;
+import com.machopiggies.famedpanic.managers.PanicInspectorManager;
 import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.observer.EventListenerUtil;
@@ -48,6 +49,11 @@ public class Core extends JavaPlugin {
         return eventListenerUtil;
     }
 
+    private static PanicInspectorManager panicInspectorManager;
+    public static PanicInspectorManager getPanicInspectorManager() {
+        return panicInspectorManager;
+    }
+
     @Override
     public void onEnable() {
         core = this;
@@ -65,12 +71,14 @@ public class Core extends JavaPlugin {
             perms = rsp.getProvider();
         }
 
-        Config.intialize();
+        Config.initialize();
         EventListener.intialize();
+
         ObserverUtil.activate(this, (observers = Arrays.asList(
                 panicManager = new PanicManager(),
                 contactManager = new ContactManager(),
-                eventListenerUtil = new EventListenerUtil()
+                eventListenerUtil = new EventListenerUtil(),
+                panicInspectorManager = new PanicInspectorManager()
         )));
         eventListenerUtil.registerListeners(this);
         CommandManager.activateCmds(this);
@@ -78,12 +86,15 @@ public class Core extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        core = null;
+        panicManager.emergencyResetAll();
+        panicInspectorManager.emergencyResetAll();
 
         ObserverUtil.deactivate(observers);
         panicManager = null;
         contactManager = null;
         eventListenerUtil = null;
+        panicInspectorManager = null;
+        core = null;
     }
 
     public static Core getPlugin() {

@@ -1,5 +1,6 @@
 package com.machopiggies.famedpanic.observer;
 
+import com.machopiggies.famedpanic.commands.CommandManager;
 import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Message;
 import com.machopiggies.famedpanic.util.PacketManager;
@@ -25,13 +26,7 @@ public abstract class EventListener extends Observer {
     public static void intialize() {
         List<Command> commands = new ArrayList<>();
         List<String> list = Config.getConfig().getStringList("panic.stopCommands");
-        SimpleCommandMap commandMap = null;
-        try {
-            Object cserver = Objects.requireNonNull(PacketManager.getClassNMS("CraftServer", PacketManager.NMSType.CRAFTBUKKIT)).cast(Bukkit.getServer());
-            commandMap = (SimpleCommandMap) cserver.getClass().getMethod("getCommandMap").invoke(cserver);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        SimpleCommandMap commandMap = CommandManager.getCommandMap();
 
         if (commandMap != null) {
             for (Command cmd : commandMap.getCommands()) {

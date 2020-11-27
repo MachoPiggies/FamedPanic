@@ -12,45 +12,47 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PanicManager extends Observer {
 
-    private static Set<PanicData> panicking;
-    private static RepeatingTask task;
-
+    private Set<PanicData> panicking;
+    private RepeatingTask task;
+    private Map<UUID, Pair<Long, RepeatingTask>> cooldowns;
+//todo add safemode to config
     @Override
     public void onActivate() {
         panicking = new HashSet<>();
-
         task = new RepeatingTask();
+        cooldowns = new HashMap<>();
 
-        BaseComponent[] title = TextComponent.fromLegacyText(Config.getConfig().getString("title.title", "&c&lPANIC"));
-        BaseComponent[] subtitle = TextComponent.fromLegacyText(Config.getConfig().getString("title.subtitle", "&eA staff member will be with you shortly!"));
-        String titleText = ComponentSerializer.toString(title);
-        titleText = titleText.replace("u0026", "u00a7");
+        if (Config.settings.showTitle) {
+            BaseComponent[] title = TextComponent.fromLegacyText(Config.getConfig().getString("title.title", "&c&lPANIC"));
+            BaseComponent[] subtitle = TextComponent.fromLegacyText(Config.getConfig().getString("title.subtitle", "&eA staff member will be with you shortly!"));
+            String titleText = ComponentSerializer.toString(title);
+            titleText = titleText.replace("u0026", "u00a7");
 
-        String subtitleText = ComponentSerializer.toString(subtitle);
-        subtitleText = subtitleText.replace("u0026", "u00a7");
+            String subtitleText = ComponentSerializer.toString(subtitle);
+            subtitleText = subtitleText.replace("u0026", "u00a7");
 
-        String finalTitleText = titleText;
-        String finalSubtitleText = subtitleText;
+            String finalTitleText = titleText;
+            String finalSubtitleText = subtitleText;
 
-        task.setTask(Bukkit.getScheduler().runTaskTimer(Core.getPlugin(), () -> {
-            Set<PanicData> local = new HashSet<>(panicking);
-            for (PanicData data : local) {
-                PacketManager.sendTitle(data.player, finalTitleText, finalSubtitleText, 0, 45, 0);
-            }
-        }, 0, 40));
+            task.setTask(Bukkit.getScheduler().runTaskTimer(Core.getPlugin(), () -> {
+                Set<PanicData> local = new HashSet<>(panicking);
+                for (PanicData data : local) {
+                    PacketManager.sendTitle(data.player, finalTitleText, finalSubtitleText, 0, 45, 0);
+                }
+            }, 0, 40));
+        }
     }
 
     @Override
     public void onDeactivate() {
-        for (PanicData data : panicking) {
-            Message.send(data.player, Message.msgs.forcedOut);
-        }
+        task.cancel();
         panicking = null;
+        cooldowns = null;
+        task = null;
     }
 
     public void protect(PanicData data) {
@@ -58,7 +60,7 @@ public class PanicManager extends Observer {
         if (!Config.isSafemode()) {
             Core.getContactManager().enterAnnounce(data);
         }
-        Message.send(data.player, Message.msgs.enabled);
+        Message.send(data.player, Config.isSafemode() ? Message.msgs.enabledSafemode : Message.msgs.enabled);
         data.player.setMetadata("panicking", new FixedMetadataValue(Core.getPlugin(), data.time));
         data.player.setWalkSpeed(0);
         data.player.setFlySpeed(0);
@@ -66,6 +68,7 @@ public class PanicManager extends Observer {
         data.player.setFlying(true);
     }
 
+    @Deprecated
     public void unprotect(PanicData data, CommandSender remover) {
         panicking.remove(data);
         if (!Config.isSafemode()) {
@@ -83,6 +86,16 @@ public class PanicManager extends Observer {
         data.player.setFlySpeed(data.settings.flyspeed);
         data.player.setFlying(data.settings.flying);
         data.player.setAllowFlight(data.settings.allowedFlying);
+
+        if (Config.settings.panicInspector.enabled) {
+            for (PanicInspectorManager.InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
+                if (inspector.target.equals(data.player)) {
+                    if (Core.getPanicInspectorManager().isInspector(inspector.player)) {
+                        Core.getPanicInspectorManager().removeInspector(inspector.player, inspector, PanicInspectorManager.RemoveReason.PANIC_CANCELLED);
+                    }
+                }
+            }
+        }
     }
 
     public void unprotect(Player player, CommandSender remover) {
@@ -96,7 +109,7 @@ public class PanicManager extends Observer {
         if (!Config.isSafemode()) {
             Core.getContactManager().exitAnnounce(data);
         }
-        if (remover.equals(data.player)) {
+        if (remover != null && remover.equals(data.player)) {
             Message.send(data.player, Message.msgs.disabled);
         } else {
             Message.send(data.player, Message.msgs.staffDisabled);
@@ -105,14 +118,36 @@ public class PanicManager extends Observer {
             data.player.removeMetadata("panicking", Core.getPlugin());
         }
         panicking.removeIf(entry -> entry.player.equals(player));
-        Logger.severe(data.settings.toString());
         data.player.setWalkSpeed(data.settings.speed);
         data.player.setFlySpeed(data.settings.flyspeed);
         data.player.setFlying(data.settings.flying);
         data.player.setAllowFlight(data.settings.allowedFlying);
+
+        if (Config.settings.panicInspector.enabled) {
+            for (PanicInspectorManager.InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
+                if (inspector.target.equals(data.player)) {
+                    if (Core.getPanicInspectorManager().isInspector(inspector.player)) {
+                        if (remover != null) {
+                            Core.getPanicInspectorManager().removeInspector(inspector.player, inspector, PanicInspectorManager.RemoveReason.PANIC_CANCELLED);
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    public static boolean panicking(Player player) {
+    public void emergencyResetAll() {
+        for (PanicData data : panicking) {
+            Message.send(data.player, Message.msgs.forcedOut);
+            unprotect(data.player, null);
+        }
+        for (Map.Entry<UUID, Pair<Long, RepeatingTask>> entry : cooldowns.entrySet()) {
+            entry.getValue().getSecond().cancel();
+            cooldowns.remove(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public boolean panicking(Player player) {
         for (PanicData data : panicking) {
             if (data.player.equals(player)) {
                 return true;
@@ -121,7 +156,7 @@ public class PanicManager extends Observer {
         return false;
     }
 
-    public static PanicData panickingObj(Player player) {
+    public PanicData panickingObj(Player player) {
         for (PanicData data : panicking) {
             if (data.player.equals(player)) {
                 return data;
@@ -130,7 +165,27 @@ public class PanicManager extends Observer {
         return null;
     }
 
-    public static Set<PanicData> getPanicking() {
+    public Set<PanicData> getPanicking() {
         return panicking;
+    }
+
+    public long getCooldownLength(UUID uuid) {
+        return cooldowns.containsKey(uuid) ? cooldowns.get(uuid).getFirst() : 0L;
+    }
+
+    public void addCooldown(UUID uuid, long time) {
+        RepeatingTask task = new RepeatingTask();
+        task.setTask(Bukkit.getScheduler().runTaskLater(Core.getPlugin(), () -> cooldowns.remove(uuid), time));
+    }
+
+    public void removeCooldown(UUID uuid) {
+        if (cooldowns.containsKey(uuid)) {
+            cooldowns.get(uuid).getSecond().cancel();
+        }
+        cooldowns.remove(uuid);
+    }
+
+    public boolean isOnCooldown(UUID uuid) {
+        return cooldowns.containsKey(uuid);
     }
 }

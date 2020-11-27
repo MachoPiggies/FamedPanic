@@ -1,8 +1,7 @@
 package com.machopiggies.famedpanic.util;
 
-import com.google.gson.Gson;
 import com.machopiggies.famedpanic.Core;
-import org.apache.commons.io.IOUtils;
+import jdk.javadoc.internal.doclets.formats.html.AllClassesIndexWriter;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -16,14 +15,11 @@ public class Config {
         return Core.getPlugin().getConfig();
     }
 
-    public static YamlConfiguration getMessagesConfig() {
-        return authConfig;
-    }
-
-    private static YamlConfiguration authConfig;
     public static Auth auth = null;
-    private static File dJson = null;
-    private static boolean bungee = false;
+    public static AuthPrefs authPrefs = null;
+    public static Settings settings;
+    private static File dEJson = null;
+    private static File dLJson = null;
     private static boolean safemode = false;
 
     public static boolean isSafemode() {
@@ -34,90 +30,108 @@ public class Config {
         Config.safemode = safemode;
     }
 
-    public static boolean isBungee() {
-        return bungee;
+    public static File getDEJson() {
+        return dEJson;
+    }
+    public static File getDLJson() {
+        return dLJson;
     }
 
-    public static File getdJson() {
-        return dJson;
-    }
-
-    public static void intialize() {
+    public static void initialize() {
         Core.getPlugin().saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         Message.buildConfig();
-        bungee = Config.getConfig().getBoolean("settings.bungee", false);
-        File auth = new File(Core.getPlugin().getDataFolder(), "auth.yml");
-        if (!auth.exists()) {
-            try {
-                Logger.debug("Unable to find '" + auth.getName() + "', creating a new one!");
-                if (!auth.createNewFile()) {
-                    Logger.severe("There was an unknown error whilst trying to create '" + auth.getName() + "'. If the file has been created in " + auth.getParentFile().getPath() + ", you can ignore this. If it hasn't and restarting your server does not fix this, please contact the plugin developer via DM.");
-                } else {
-                    Logger.debug("Created '" + auth.getName() + "' successfully!");
-                }
-            } catch (IOException e) {
-                Logger.severe("An error occurred whilst trying to create '" + auth.getName() + "'. If restarting your server does not fix this, please contact the plugin developer via DM with the below stack trace!");
-                e.printStackTrace();
-            }
-            authConfig = YamlConfiguration.loadConfiguration(auth);
-            authConfig.set("discord.enabled", false);
-            authConfig.set("discord.webhookURL", "");
-            authConfig.set("discord.embed.useEmbed", true);
-            authConfig.set("discord.embed.message", "{%PLAYER%} has activated panic mode{%SERVER%}! Please see to this immediately.\n\n\n");
-            authConfig.set("discord.embed.colorHEX", 13828351);
-            authConfig.set("discord.embed.image", "");
-            authConfig.set("discord.embed.website", "");
-            authConfig.set("slack.enabled", false);
-            authConfig.set("slack.webhookURL", "");
-            authConfig.set("slack.useBlock", true);
+        settings = new Settings(
+                getConfig().getBoolean("settings.bungee", false),
+                getConfig().getBoolean("settings.showTitle", true),
+                getConfig().getBoolean("settings.savePanicking", false),
+                getConfig().getInt("settings.defaultCooldown", -1),
+                getConfig().getBoolean("settings.allowStaffTeleportPI", true),
+                getConfig().getBoolean("settings.usePanicInspector.enabled", false),
+                getConfig().getString("settings.usePanicInspector.vanishCommand", "vanish"),
+                getConfig().getString("settings.usePanicInspector.unvanishCommand", "unvanish"),
+                getConfig().getInt("settings.usePanicInspector.secondsUntilRemoval", 10),
+                getConfig().getBoolean("settings.usePanicInspector.alertTarget", true)
+        );
 
-            try {
-                authConfig.save(auth);
-            } catch (IOException e) {
-                Logger.severe("An error occurred whilst trying to save '" + auth.getName() + "' after creation which means it has not loaded properly. If deleting the file and restarting your server does not fix this, please contact the plugin developer via DM!");
-                e.printStackTrace();
-            }
-        } else {
-            authConfig = YamlConfiguration.loadConfiguration(auth);
-        }
+        Map<String, Object> defaults = new HashMap<>();
+        defaults.put("discord.enabled", false);
+        defaults.put("discord.webhookURL", "");
+        defaults.put("discord.embed.useEmbed", true);
+        defaults.put("discord.embed.embedAltEnter", "@everyone {%PLAYER_NAME%} has activated panic mode! Please see to this immediately.");
+        defaults.put("discord.embed.embedAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!");
+        defaults.put("discord.embed.colorHEX", 13828351);
+        defaults.put("slack.enabled", false);
+        defaults.put("slack.webhookURL", "");
+        defaults.put("slack.useBlock", true);
+        File auth = FileUtil.getYamlFile("auth.yml", Core.getPlugin().getDataFolder(), defaults);
+        YamlConfiguration authConfig = YamlConfiguration.loadConfiguration(auth);
 
         Config.auth = new Auth(
                 authConfig.getString("discord.webhookURL", ""),
                 authConfig.getString("slack.webhookURL", "")
         );
+        authPrefs = new AuthPrefs(
+                authConfig.getBoolean("discord.enabled", false),
+                authConfig.getString("discord.webhookURL", ""),
+                authConfig.getBoolean("discord.embed.useEmbed", true),
+                authConfig.getString("discord.embed.embedAltEnter", "@everyone {%PLAYER_NAME%} has activated panic mode! Please see to this immediately."),
+                authConfig.getString("discord.embed.embedAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!"),
+                authConfig.getInt("discord.embed.colorHEX", 13828351),
+                authConfig.getBoolean("slack.enabled", false),
+                authConfig.getString("slack.webhookURL", ""),
+                authConfig.getBoolean("slack.useBlock", true)
+        );
 
-        File rfile = new File(Core.getPlugin().getDataFolder(), "embeds");
-        if (!rfile.exists()) {
-            Logger.debug("Unable to find '" + rfile.getName() + "', creating a new one!");
-            if (!rfile.mkdirs()) {
-                Logger.severe("There was an unknown error whilst trying to create '" + rfile.getName() + "'. If the file has been created in " + rfile.getParentFile().getPath() + ", you can ignore this. If it hasn't and restarting your server does not fix this, please contact the plugin developer via DM.");
-            } else {
-                Logger.debug("Created '" + rfile.getName() + "' successfully!");
-            }
-        }
-
-        File dJson = new File(rfile, "discord.json");
-        if (!dJson.exists()) {
-            Logger.debug("Unable to find '" + dJson.getName() + "', creating a new one!");
-            try {
-                if (!dJson.createNewFile()) {
-                    Logger.severe("There was an unknown error whilst trying to create '" + dJson.getName() + "'. If the file has been created in " + dJson.getParentFile().getPath() + ", you can ignore this. If it hasn't and restarting your server does not fix this, please contact the plugin developer via DM.");
-                } else {
-                    Logger.debug("Created '" + dJson.getName() + "' successfully!");
-                }
-
-                OutputStream outputStream = new FileOutputStream(dJson);
-                IOUtils.copy(Core.getPlugin().getResource("discordEmbed.json"), outputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        Config.dJson = dJson;
+        File embedsFolder = FileUtil.getFolder("embeds", Core.getPlugin().getDataFolder());
+        Config.dEJson = FileUtil.getJsonFile("discordEnter.json", embedsFolder, Core.getPlugin().getResource("discordEnter.json"));
+        Config.dLJson = FileUtil.getJsonFile("discordLeave.json", embedsFolder, Core.getPlugin().getResource("discordLeave.json"));
     }
 
     public static boolean isDebugMode() {
         return true;
+    }
+
+    public static class Settings {
+        public boolean bungee;
+        public boolean showTitle;
+        public boolean savePanicking;
+        public long defaultCooldown;
+        public boolean allowStaffTeleport;
+        public PanicInspectorSettings panicInspector;
+
+        public Settings(boolean bungee, boolean showTitle, boolean savePanicking,
+                        long defaultCooldown, boolean allowStaffTeleport,
+                        boolean usePanicInspector, String vanishCmd, String unvanishCmd, int kickDelay, boolean inspectorAlert) {
+            this.bungee = bungee;
+            this.showTitle = showTitle;
+            this.savePanicking = savePanicking;
+            this.defaultCooldown = defaultCooldown;
+            this.allowStaffTeleport = allowStaffTeleport;
+            panicInspector = new PanicInspectorSettings(
+                    usePanicInspector,
+                    vanishCmd,
+                    unvanishCmd,
+                    kickDelay,
+                    inspectorAlert
+            );
+        }
+
+        public static class PanicInspectorSettings {
+            public boolean enabled;
+            public String vanishCmd;
+            public String unvanishCmd;
+            public int kickDelay;
+            public boolean inspectorAlert;
+
+            public PanicInspectorSettings(boolean enabled, String vanishCmd, String unvanishCmd, int kickDelay, boolean inspectorAlert) {
+                this.enabled = enabled;
+                this.vanishCmd = vanishCmd;
+                this.unvanishCmd = unvanishCmd;
+                this.kickDelay = kickDelay;
+                this.inspectorAlert = inspectorAlert;
+            }
+        }
     }
 
     public static class Auth {
@@ -127,6 +141,50 @@ public class Config {
         public Auth(String discord, String slack) {
             this.discord = discord;
             this.slack = slack;
+        }
+    }
+
+    public static class AuthPrefs {
+        public Discord discord;
+        public Slack slack;
+
+        public AuthPrefs(boolean discordEnabled, String discordWebhookURL, boolean useEmbed,
+                         String embedAltEnter, String embedAltLeave, int color,
+
+                         boolean slackEnabled, String slackWebhookURL, boolean useBlock
+        ) {
+            discord = new Discord(discordEnabled, discordWebhookURL, useEmbed, embedAltEnter, embedAltLeave, color);
+            slack = new Slack(slackEnabled, slackWebhookURL, useBlock);
+        }
+
+        public static class Discord {
+            public boolean enabled;
+            public String webhookURL;
+            public boolean useEmbed;
+            public String embedAltEnter;
+            public String embedAltLeave;
+            public int color;
+
+            public Discord(boolean enabled, String webhookURL, boolean useEmbed, String embedAltEnter, String embedAltLeave, int color) {
+                this.enabled = enabled;
+                this.webhookURL = webhookURL;
+                this.useEmbed = useEmbed;
+                this.embedAltEnter = embedAltEnter;
+                this.embedAltLeave = embedAltLeave;
+                this.color = color;
+            }
+        }
+
+        public static class Slack {
+            public boolean enabled;
+            public String webhookURL;
+            public boolean useBlock;
+
+            public Slack(boolean enabled, String webhookURL, boolean useBlock) {
+                this.enabled = enabled;
+                this.webhookURL = webhookURL;
+                this.useBlock = useBlock;
+            }
         }
     }
 }

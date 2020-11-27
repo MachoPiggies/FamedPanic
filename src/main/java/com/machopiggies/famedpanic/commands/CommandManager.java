@@ -33,13 +33,7 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
         aliases = aliases != null ? aliases : new String[0];
         this.aliases = aliases;
 
-        SimpleCommandMap commands = null;
-        try {
-            Object cserver = Objects.requireNonNull(PacketManager.getClassNMS("CraftServer", PacketManager.NMSType.CRAFTBUKKIT)).cast(Bukkit.getServer());
-            commands = (SimpleCommandMap) cserver.getClass().getMethod("getCommandMap").invoke(cserver);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
-        }
+        SimpleCommandMap commands = getCommandMap();
 
         if (commands != null) {
             try {
@@ -62,7 +56,6 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
             }
         }
     }
-
 
     //
 
@@ -113,6 +106,17 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
 
     public static Map<PluginCommand, CommandExecutor> getExecutors() {
         return executors;
+    }
+
+    public static SimpleCommandMap getCommandMap() {
+        SimpleCommandMap commands = null;
+        try {
+            Object cserver = Objects.requireNonNull(PacketManager.getClassNMS("CraftServer", PacketManager.NMSType.CRAFTBUKKIT)).cast(Bukkit.getServer());
+            commands = (SimpleCommandMap) cserver.getClass().getMethod("getCommandMap").invoke(cserver);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+        return commands;
     }
 
     static {

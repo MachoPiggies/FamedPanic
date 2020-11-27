@@ -1,0 +1,21 @@
+{
+  "embeds": [
+    {
+      "title": "Panic",
+      "description": "{%PLAYER_NAME%} is no longer in panic mode!",
+      "color": 13828351,
+      "timestamp": "{%TIMESTAMP%}",
+      "author": {
+        "name": "{%SERVER_NAME%} Panic System",
+        "icon_url": "{%SERVER_IMAGE%}"
+      },
+      "footer": {
+        "icon_url": "{%SERVER_IMAGE%}",
+        "text": "{%SERVER_NAME%} Panic System"
+      },
+      "thumbnail": {
+        "url": "{%PLAYER_FACE%}"
+      }
+    }
+  ]
+}

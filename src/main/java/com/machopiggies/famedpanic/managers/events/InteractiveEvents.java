@@ -1,5 +1,6 @@
 package com.machopiggies.famedpanic.managers.events;
 
+import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.util.Message;
@@ -56,7 +57,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onBlockBreak(BlockBreakEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopWorldInteraction) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noBlockBreak);
@@ -66,7 +67,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onBlockPlace(BlockPlaceEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopWorldInteraction) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noBlockPlace);
@@ -76,7 +77,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onBucketEmpty(PlayerBucketEmptyEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopWorldInteraction) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noBlockBreak);
@@ -86,7 +87,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onBucketFill(PlayerBucketFillEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopWorldInteraction) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noBlockPlace);
@@ -97,7 +98,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onVehicleDestroy(VehicleDestroyEvent event) {
         if (event.getAttacker() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getAttacker())) {
+            if (Core.getPanicManager().panicking((Player) event.getAttacker())) {
                 if (prefs.stopWorldInteraction) {
                     event.setCancelled(true);
                     Message.send(event.getAttacker(), msgs.noBlockBreak);
@@ -109,7 +110,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onVehicleDamage(VehicleDamageEvent event) {
         if (event.getAttacker() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getAttacker())) {
+            if (Core.getPanicManager().panicking((Player) event.getAttacker())) {
                 if (prefs.stopWorldInteraction) {
                     event.setCancelled(true);
                     Message.send(event.getAttacker(), msgs.noBlockBreak);
@@ -121,7 +122,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onVehicleEnter(VehicleEnterEvent event) {
         if (event.getEntered() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getEntered())) {
+            if (Core.getPanicManager().panicking((Player) event.getEntered())) {
                 if (prefs.stopWorldInteraction) {
                     event.setCancelled(true);
                     Message.send(event.getEntered(), msgs.noVehicleUse);
@@ -133,7 +134,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onVehicleCollision(VehicleEntityCollisionEvent event) {
         if (event.getEntity() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getEntity())) {
+            if (Core.getPanicManager().panicking((Player) event.getEntity())) {
                 event.setCancelled(true);
             }
         }
@@ -142,7 +143,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onMobTarget(EntityTargetLivingEntityEvent event) {
         if (event.getTarget() instanceof Player) {
-            if (PanicManager.panicking((Player) event.getTarget())) {
+            if (Core.getPanicManager().panicking((Player) event.getTarget())) {
                 event.setCancelled(true);
             }
         }
@@ -150,7 +151,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onBedEnter(PlayerBedEnterEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopWorldInteraction) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noMisc);
@@ -161,7 +162,7 @@ public class InteractiveEvents extends EventListener {
     @EventHandler
     private void onInteract(PlayerInteractEvent event) {
         if ((event.getClickedBlock() != null && (badItems.contains(event.getClickedBlock().getType()) || (prefs.stopOpening && containers.contains(event.getClickedBlock().getType())))) || (event.getItem() != null && badItems.contains(event.getItem().getType()))) {
-            if (PanicManager.panicking(event.getPlayer())) {
+            if (Core.getPanicManager().panicking(event.getPlayer())) {
                 if (prefs.stopWorldInteraction) {
                     event.setCancelled(true);
                     Message.send(event.getPlayer(), msgs.noOpen);
@@ -172,7 +173,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onDropItem(PlayerDropItemEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopDropping) {
                 event.setCancelled(true);
                 Message.send(event.getPlayer(), msgs.noDrop);
@@ -182,7 +183,7 @@ public class InteractiveEvents extends EventListener {
 
     @EventHandler
     private void onPickupItem(PlayerPickupItemEvent event) {
-        if (PanicManager.panicking(event.getPlayer())) {
+        if (Core.getPanicManager().panicking(event.getPlayer())) {
             if (prefs.stopPickup) {
                 event.setCancelled(true);
             }
