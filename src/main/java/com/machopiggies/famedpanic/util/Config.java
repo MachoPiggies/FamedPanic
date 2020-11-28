@@ -1,7 +1,9 @@
 package com.machopiggies.famedpanic.util;
 
 import com.machopiggies.famedpanic.Core;
+import com.machopiggies.famedpanic.gui.StainedMaterialColor;
 import jdk.javadoc.internal.doclets.formats.html.AllClassesIndexWriter;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -20,7 +22,7 @@ public class Config {
     public static Settings settings;
     private static File dEJson = null;
     private static File dLJson = null;
-    private static boolean safemode = false;
+    private static boolean safemode;
 
     public static boolean isSafemode() {
         return safemode;
@@ -28,6 +30,8 @@ public class Config {
 
     public static void setSafemode(boolean safemode) {
         Config.safemode = safemode;
+        getConfig().set("safemode", safemode);
+        Core.getPlugin().saveConfig();
     }
 
     public static File getDEJson() {
@@ -41,12 +45,20 @@ public class Config {
         Core.getPlugin().saveDefaultConfig();
         getConfig().options().copyDefaults(true);
         Message.buildConfig();
+
+        safemode = getConfig().getBoolean("safemode", false);
+
         settings = new Settings(
                 getConfig().getBoolean("settings.bungee", false),
                 getConfig().getBoolean("settings.showTitle", true),
                 getConfig().getBoolean("settings.savePanicking", false),
                 getConfig().getInt("settings.defaultCooldown", -1),
                 getConfig().getBoolean("settings.allowStaffTeleportPI", true),
+                getConfig().getBoolean("settings.guis.enabled", true),
+                getConfig().getBoolean("settings.guis.useBorder", true),
+                StainedMaterialColor.valueOf(getConfig().getString("settings.guis.borderColor", "light gray").toUpperCase().replace(" ", "_")),
+                ChatColor.valueOf(getConfig().getString("settings.guis.titleColor", "red").toUpperCase().replace(" ", "_")),
+                ChatColor.valueOf(getConfig().getString("settings.guis.defaultColor", "gray").toUpperCase().replace(" ", "_")),
                 getConfig().getBoolean("settings.usePanicInspector.enabled", false),
                 getConfig().getString("settings.usePanicInspector.vanishCommand", "vanish"),
                 getConfig().getString("settings.usePanicInspector.unvanishCommand", "unvanish"),
@@ -98,16 +110,29 @@ public class Config {
         public boolean savePanicking;
         public long defaultCooldown;
         public boolean allowStaffTeleport;
+        public GuiMenuSettings guis;
         public PanicInspectorSettings panicInspector;
 
         public Settings(boolean bungee, boolean showTitle, boolean savePanicking,
                         long defaultCooldown, boolean allowStaffTeleport,
-                        boolean usePanicInspector, String vanishCmd, String unvanishCmd, int kickDelay, boolean inspectorAlert) {
+
+                        boolean useGuis, boolean useBorder, StainedMaterialColor borderColor,
+                        ChatColor titleColor, ChatColor defaultColor,
+
+                        boolean usePanicInspector, String vanishCmd, String unvanishCmd,
+                        int kickDelay, boolean inspectorAlert) {
             this.bungee = bungee;
             this.showTitle = showTitle;
             this.savePanicking = savePanicking;
             this.defaultCooldown = defaultCooldown;
             this.allowStaffTeleport = allowStaffTeleport;
+            guis = new GuiMenuSettings(
+                    useGuis,
+                    useBorder,
+                    borderColor,
+                    titleColor,
+                    defaultColor
+            );
             panicInspector = new PanicInspectorSettings(
                     usePanicInspector,
                     vanishCmd,
@@ -130,6 +155,22 @@ public class Config {
                 this.unvanishCmd = unvanishCmd;
                 this.kickDelay = kickDelay;
                 this.inspectorAlert = inspectorAlert;
+            }
+        }
+
+        public static class GuiMenuSettings {
+            public boolean enabled;
+            public boolean useBorder;
+            public StainedMaterialColor borderColor;
+            public ChatColor titleColor;
+            public ChatColor defaultColor;
+
+            public GuiMenuSettings(boolean enabled, boolean useBorder, StainedMaterialColor borderColor, ChatColor titleColor, ChatColor defaultColor) {
+                this.enabled = enabled;
+                this.useBorder = useBorder;
+                this.borderColor = borderColor;
+                this.titleColor = titleColor;
+                this.defaultColor = defaultColor;
             }
         }
     }

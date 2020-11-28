@@ -1,8 +1,16 @@
+safemode: false #THIS MAY BE CHANGED BY THE PLUGIN - When true, panic alerts will not be sent to other services such as discord or slack
+
 settings:
   bungee: false #If your server has anything to do with bungeecord, this being true will give you more placeholders
   showTitle: true #Shows title to panicking players, config below
-  defaultCooldown: -1 #Set to -1 to have no cooldown, players with 'famedpanic.panic.cooldown.bypass' will bypass this cooldown
+  defaultCooldown: -1 #Set to -1 to have no cooldown, players with 'famedpanic.panic.cooldown.bypass' will bypass this cooldown (Time in seconds)
   allowStaffTeleport: true #This allows staff to teleport to panicking players through the /panicking command or the panic alert
+  guis: #Some commands have the option to display GUIs for functionality, when this is false, no GUIs will be used
+    enabled: true
+    useBorder: true #A border is stained glass that covers the perimeter of the GUI, it has no functionality
+    borderColor: 'red' #Sets the border (if above true) to the selected color (Options: white, orange, magenta, light blue, yellow, lime, pink, gray, light gray, cyan, purple, blue, brown, green, red, black)
+    titleColor: 'red' #Sets all title text to the selected color (Options: black, dark blue, dark green, dark aqua, red, purple, gold, gray, dark gray, blue, green, aqua, red, light purple, yellow, white)
+    defaultColor: 'gray' #Sets the default text to the selected color (Options: black, dark blue, dark green, dark aqua, red, purple, gold, gray, dark gray, blue, green, aqua, red, light purple, yellow, white)
 
   #THIS IS BETA WHICH MEANS THERE COULD BE ISSUES SURROUNDING ITS USE
   #This works by sending a player into vanish whilst in spectator mode

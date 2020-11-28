@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class ForceInspectorCancelCommand extends CommandManager {
 
     public ForceInspectorCancelCommand() {
-        super("panicforceinspectorcancel", "The reset command for the inspector", "famedpanic.inspector.forcecancel", "pfic");
+        super("panicfic", "The reset command for the inspector", "famedpanic.inspector.forcecancel", "/panicfic [player]", "pfic");
     }
 
     @Override

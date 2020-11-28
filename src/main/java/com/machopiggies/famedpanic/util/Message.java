@@ -17,9 +17,6 @@ public class Message {
 
     private static boolean initial = true;
 
-    private static FileConfiguration yml;
-    private static FileConfiguration yml1;
-
     public static Messages msgs;
     public static ServerInfo serverInfo;
 
@@ -55,6 +52,8 @@ public class Message {
         defaults.put("alerts.inspector-mode-disabled", md.inspectorDisabled);
         defaults.put("alerts.inspector-kick", md.inspectorKick);
         defaults.put("alerts.inspector-arrival", md.inspectorArrival);
+        defaults.put("alerts.cooldown-expire", md.cooldownExpire);
+        defaults.put("alerts.cooldown-add", md.cooldownAdd);
 
         defaults.put("protections.interact.no-open", md.noOpen);
         defaults.put("protections.interact.no-drop", md.noDrop);
@@ -68,8 +67,9 @@ public class Message {
         defaults.put("protections.no-chat", md.noChat);
         defaults.put("commands.cancelpanic.success", md.cmdCPSuccess);
         defaults.put("commands.cancelpanic.notpanicking", md.cmdCPNotPanicking);
+        defaults.put("commands.parsing.invalid-number", md.cmdInvalidNumber);
         File messages = FileUtil.getYamlFile("messages.yml", file, defaults);
-        yml = YamlConfiguration.loadConfiguration(messages);
+        FileConfiguration yml = YamlConfiguration.loadConfiguration(messages);
 
         msgs = new Messages(
                 yml.getString("general.prefix", md.prefix),
@@ -98,6 +98,8 @@ public class Message {
                 yml.getString("alerts.inspector-mode-disabled", md.inspectorDisabled),
                 yml.getString("alerts.inspector-kick", md.inspectorKick),
                 yml.getString("alerts.inspector-arrival", md.inspectorArrival),
+                yml.getString("alerts.cooldown-expire", md.cooldownExpire),
+                yml.getString("alerts.cooldown-add", md.cooldownAdd),
 
                 yml.getString("protections.interact.no-open", md.noOpen),
                 yml.getString("protections.interact.no-drop", md.noDrop),
@@ -110,7 +112,9 @@ public class Message {
                 yml.getString("protections.no-command", md.noCommands),
                 yml.getString("protections.no-chat", md.noChat),
                 yml.getString("commands.cancelpanic.success", md.cmdCPSuccess),
-                yml.getString("commands.cancelpanic.notpanicking", md.cmdCPNotPanicking)
+                yml.getString("commands.cancelpanic.notpanicking", md.cmdCPNotPanicking),
+
+                yml.getString("commands.parsing.invalid-number", md.cmdInvalidNumber)
         );
 
         if (!initial) {
@@ -127,7 +131,7 @@ public class Message {
         sDDefaults.put("server.name", "Minecraft Server");
         sDDefaults.put("server.image", "https://static.planetminecraft.com/files/resource_media/screenshot/1606/photo9868183_lrg.jpg");
         File serverData = FileUtil.getYamlFile("server-data.yml", file, sDDefaults);
-        yml1 = YamlConfiguration.loadConfiguration(serverData);
+        FileConfiguration yml1 = YamlConfiguration.loadConfiguration(serverData);
 
         serverInfo = new ServerInfo(
                 yml1.getString("server.name", "Minecraft Server"),
@@ -196,7 +200,7 @@ public class Message {
         public String safemodeOff = "{%PREFIX%}&7Safemode is turned &coff&7!";
         public String announceEnter = "{%EMERGENCY_PREFIX%}&c{%PLAYER_DISPLAYNAME%} &ehas activated panic mode! Please investigate immediately.";
         public String announceEnterInspector = "&6&lCLICK TO TELEPORT!";
-        public String announceEnterInspectorHover = "&6&lYou will enter inspector mode!";
+        public String announceEnterInspectorHover = "&6You will enter inspector mode!";
         public String announceLeave = "{%EMERGENCY_PREFIX%}&c{%PLAYER_DISPLAYNAME%} &eis no longer in panic mode!";
         public String enabled = "{%PREFIX%}&7You have entered panic mode! Staff have been alerted and will be with you momentarily.";
         public String enabledSafemode = "{%PREFIX%}&7You have entered panic mode! The system is in safemode, this means staff have NOT been notified externally, you may need to direct message a staff member instead of waiting.";
@@ -212,6 +216,10 @@ public class Message {
         public String inspectorDisabled = "{%PREFIX%}&7The panic inspector is not enabled on this server!";
         public String inspectorKick = "{%PREFIX%}&c{%TARGET_NAME%} &7has left panic mode. You will be removed from inspector mode in &c{%INSPECTOR_KICK_DELAY%}&7!";
         public String inspectorArrival = "{%PREFIX%}&7A staff member has arrived!";
+        public String cooldownExpire = "{%PREFIX%}&7You can use panic again!";
+        public String cooldownAdd = "{%PREFIX%}&7You are on panic cooldown for &c{%COOLDOWN_EXPIRE%}&7!";
+        public String inPanicMode = "{%PREFIX%}&c{%TARGET_NAME%} &7is in panic mode!";
+        public String notInPanicMode = "{%PREFIX%}&c{%TARGET_NAME%} &7 is not in panic mode!";
 
         public String noOpen = "{%PREFIX%}&7You cannot open containers whilst in panic mode!";
         public String noDrop = "{%PREFIX%}&7You cannot drop items whilst in panic mode!";
@@ -226,6 +234,8 @@ public class Message {
         public String cmdCPSuccess = "{%PREFIX%}&7Successfully cancelled &c{%TARGET_NAME%}&7's panic status!";
         public String cmdCPNotPanicking = "{%PREFIX%}&c{%TARGET_NAME%} &7is not in panic mode!";
 
+        public String cmdInvalidNumber = "{%PREFIX%}&c{%TARGET_NAME%} &7 is not a number!";
+
         public Messages(String prefix, String emergencyPrefix, String noPermission, String mAPlayer, String setSafemodeOn,
                         String setSafemodeOff, String safemodeOn, String safemodeOff,
                         String announceEnter, String announceEnterInspector, String announceEnterInspectorHover,
@@ -233,12 +243,14 @@ public class Message {
                         String disabled, String staffDisabled, String onCooldown, String forcedOut,
                         String resetSuccess, String panicWhilstSpec, String specWhilstPanic,
                         String inspectorEnter, String inspectorLeave, String inspectorDisabled,
-                        String inspectorKick, String inspectorArrival,
+                        String inspectorKick, String inspectorArrival, String cooldownExpire, String cooldownAdd,
 
                         String noOpen, String noDrop, String noMisc,
                         String noBlockBreak, String noBlockPlace, String noVehicleUse,
                         String noDamager, String noDamagee, String noCommands,
-                        String noChat, String cmdCPSuccess, String cmdCPNotPanicking) {
+                        String noChat, String cmdCPSuccess, String cmdCPNotPanicking,
+
+                        String cmdInvalidNumber) {
             this.prefix = prefix;
             this.emergencyPrefix = emergencyPrefix;
             this.noPermission = noPermission;
@@ -265,6 +277,8 @@ public class Message {
             this.inspectorDisabled = inspectorDisabled;
             this.inspectorKick = inspectorKick;
             this.inspectorArrival = inspectorArrival;
+            this.cooldownExpire = cooldownExpire;
+            this.cooldownAdd = cooldownAdd;
 
             this.noOpen = noOpen;
             this.noDrop = noDrop;
@@ -278,6 +292,7 @@ public class Message {
             this.noChat = noChat;
             this.cmdCPSuccess = cmdCPSuccess;
             this.cmdCPNotPanicking = cmdCPNotPanicking;
+            this.cmdInvalidNumber = cmdInvalidNumber;
         }
 
         public Messages() { }

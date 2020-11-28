@@ -11,15 +11,16 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.util.StringUtil;
 import sun.rmi.runtime.Log;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class PanicInspectorCommand extends CommandManager {
     //todo allow disabling and adding of more aliases in config for each command, probably in separate config file
     public PanicInspectorCommand() {
-            super("panicinspector", "Allows a player to enter panic inspector mode", "famedpanic.panicinspector", "/pi");
+        super("panicinspector", "Allows a player to enter panic inspector mode", "famedpanic.panicinspector", "/panicinspector <player>", "pi");
     }
 
     @Override
@@ -71,5 +72,16 @@ public class PanicInspectorCommand extends CommandManager {
         }
 
         return super.onCommand(sender, command, s, args);
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
+        List<String> completions = new ArrayList<>();
+        StringUtil.copyPartialMatches(args[0], Bukkit.getOnlinePlayers().stream()
+                .map(Player::getName)
+                .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                .collect(Collectors.toList()), completions);
+        Collections.sort(completions);
+        return completions;
     }
 }

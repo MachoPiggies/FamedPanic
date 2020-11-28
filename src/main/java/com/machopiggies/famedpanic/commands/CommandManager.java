@@ -72,11 +72,11 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
     }
 
     //
-    public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
+    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         return true;
     }
 
-    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
         return null;
     }
 

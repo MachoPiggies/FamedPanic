@@ -1,6 +1,7 @@
 package com.machopiggies.famedpanic;
 
 import com.machopiggies.famedpanic.commands.CommandManager;
+import com.machopiggies.famedpanic.gui.GuiManager;
 import com.machopiggies.famedpanic.managers.ContactManager;
 import com.machopiggies.famedpanic.managers.PanicInspectorManager;
 import com.machopiggies.famedpanic.managers.PanicManager;
@@ -54,6 +55,11 @@ public class Core extends JavaPlugin {
         return panicInspectorManager;
     }
 
+    private static GuiManager guiManager;
+    public static GuiManager getGuiManager() {
+        return guiManager;
+    }
+
     @Override
     public void onEnable() {
         core = this;
@@ -78,7 +84,8 @@ public class Core extends JavaPlugin {
                 panicManager = new PanicManager(),
                 contactManager = new ContactManager(),
                 eventListenerUtil = new EventListenerUtil(),
-                panicInspectorManager = new PanicInspectorManager()
+                panicInspectorManager = new PanicInspectorManager(),
+                guiManager = new GuiManager()
         )));
         eventListenerUtil.registerListeners(this);
         CommandManager.activateCmds(this);
@@ -94,6 +101,7 @@ public class Core extends JavaPlugin {
         contactManager = null;
         eventListenerUtil = null;
         panicInspectorManager = null;
+        guiManager = null;
         core = null;
     }
 

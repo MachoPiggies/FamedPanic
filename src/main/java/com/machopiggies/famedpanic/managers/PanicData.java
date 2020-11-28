@@ -76,4 +76,4 @@ public class PanicData {
     }
 }
 
-//todo: /panicking, /ispanicking, /cancelpanic, /paniccooldown
+//todo: /panicking

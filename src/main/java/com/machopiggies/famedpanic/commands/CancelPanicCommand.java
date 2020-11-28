@@ -6,9 +6,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CancelPanicCommand extends CommandManager {
 
@@ -46,5 +47,16 @@ public class CancelPanicCommand extends CommandManager {
         }
 
         return super.onCommand(sender, command, s, args);
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String s, String[] args) {
+        List<String> completions = new ArrayList<>();
+        StringUtil.copyPartialMatches(args[0], Bukkit.getOnlinePlayers().stream()
+                .map(Player::getName)
+                .filter(name -> name.toLowerCase().startsWith(args[0].toLowerCase()))
+                .collect(Collectors.toList()), completions);
+        Collections.sort(completions);
+        return completions;
     }
 }

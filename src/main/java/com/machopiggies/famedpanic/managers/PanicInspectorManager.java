@@ -1,6 +1,5 @@
 package com.machopiggies.famedpanic.managers;
 
-import com.google.gson.JsonObject;
 import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.observer.Observer;
 import com.machopiggies.famedpanic.util.*;
@@ -44,7 +43,6 @@ public class PanicInspectorManager extends Observer {
     }
 
     public void addInspector(Player player, InspectorData data) {
-        //todo
         inspectors.put(player, data);
         player.performCommand(Config.settings.panicInspector.vanishCmd);
         player.setGameMode(GameMode.SPECTATOR);
@@ -60,8 +58,6 @@ public class PanicInspectorManager extends Observer {
     }
 
     public void removeInspector(Player player, InspectorData data, RemoveReason reason) {
-        //todo
-
         switch (reason) {
             case PANIC_CANCELLED:
                 if (Config.settings.panicInspector.kickDelay > 0) {
@@ -102,9 +98,7 @@ public class PanicInspectorManager extends Observer {
 
     public static class InspectorData {
         public Player player;
-        public UUID playerUuid;
         public Player target;
-        public UUID targetUuid;
         public Location origin;
         public GameMode gamemode;
         public Long time;
@@ -116,18 +110,9 @@ public class PanicInspectorManager extends Observer {
             gamemode = player.getGameMode();
             time = Instant.now().getEpochSecond();
         }
-
-        public InspectorData(UUID playerUuid, UUID targetUuid, Location origin, GameMode gamemode, long time) {
-            this.playerUuid = playerUuid;
-            this.targetUuid = targetUuid;
-            this.origin = origin;
-            this.gamemode = gamemode;
-            this.time = time;
-        }
     }
 
     private void remove(Player player, InspectorData data, String message, Map<String, String> placeholders) {
-        Logger.warn(player.getName());
         if (player.hasMetadata("panickinspector")) {
             player.removeMetadata("panickinspector", Core.getPlugin());
         }
@@ -156,6 +141,6 @@ public class PanicInspectorManager extends Observer {
         COMMAND,
         SERVER_CLOSE,
         QUIT,
-        ERROR;
+        ERROR
     }
 }

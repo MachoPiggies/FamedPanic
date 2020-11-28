@@ -5,20 +5,24 @@ import java.text.SimpleDateFormat;
 public class TimeDateUtil {
 
     public static String getSimpleDurationStringFromSeconds(long seconds) {
-        if (seconds >= 60) {
-            double mins = MathUtil.round((double) seconds / 60, 1);
-            if (mins >= 60) {
-                double hours = MathUtil.round(mins / 60, 1);
-                if (hours >= 24) {
-                    return trimTime(MathUtil.round(hours / 24, 1) == 1 ? MathUtil.round(hours / 24, 1) + " day" : MathUtil.round(hours / 24, 1) + "days");
+        if (seconds > 0) {
+            if (seconds >= 60) {
+                double mins = MathUtil.round((double) seconds / 60, 1);
+                if (mins >= 60) {
+                    double hours = MathUtil.round(mins / 60, 1);
+                    if (hours >= 24) {
+                        return trimTime(MathUtil.round(hours / 24, 1) == 1 ? MathUtil.round(hours / 24, 1) + " day" : MathUtil.round(hours / 24, 1) + "days");
+                    } else {
+                        return trimTime(hours == 1 ? hours + " hour" : hours + " hours");
+                    }
                 } else {
-                    return trimTime(hours == 1 ? hours + " hour" : hours + " hours");
+                    return trimTime(mins == 1 ? mins + " minute" : mins + " minutes");
                 }
             } else {
-                return trimTime(mins == 1 ? mins + " minute" : mins + " minutes");
+                return trimTime(seconds == 1 ? seconds + " second" : seconds + " seconds");
             }
         } else {
-            return trimTime(seconds == 1 ? seconds + " second" : seconds + " seconds");
+            return "0 seconds";
         }
     }
 

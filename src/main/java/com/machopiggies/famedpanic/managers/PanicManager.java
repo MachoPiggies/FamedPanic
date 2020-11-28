@@ -12,13 +12,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.time.Instant;
 import java.util.*;
 
 public class PanicManager extends Observer {
 
     private Set<PanicData> panicking;
     private RepeatingTask task;
-    private Map<UUID, Pair<Long, RepeatingTask>> cooldowns;
+    private Map<UUID, Pair<Pair<Long, Long>, RepeatingTask>> cooldowns;
 //todo add safemode to config
     @Override
     public void onActivate() {
@@ -141,7 +142,7 @@ public class PanicManager extends Observer {
             Message.send(data.player, Message.msgs.forcedOut);
             unprotect(data.player, null);
         }
-        for (Map.Entry<UUID, Pair<Long, RepeatingTask>> entry : cooldowns.entrySet()) {
+        for (Map.Entry<UUID, Pair<Pair<Long, Long>, RepeatingTask>> entry : cooldowns.entrySet()) {
             entry.getValue().getSecond().cancel();
             cooldowns.remove(entry.getKey(), entry.getValue());
         }
@@ -165,17 +166,46 @@ public class PanicManager extends Observer {
         return null;
     }
 
-    public Set<PanicData> getPanicking() {
-        return panicking;
+    public long getCooldownLength(UUID uuid) {
+        return cooldowns.containsKey(uuid) ? cooldowns.get(uuid).getFirst().getFirst() : 0L;
     }
 
-    public long getCooldownLength(UUID uuid) {
-        return cooldowns.containsKey(uuid) ? cooldowns.get(uuid).getFirst() : 0L;
+    public long getCooldownExpiry(UUID uuid) {
+        return cooldowns.containsKey(uuid) ? cooldowns.get(uuid).getFirst().getSecond() : 0L;
+    }
+
+    public void setCooldown(UUID uuid, long time) {
+        if (cooldowns.containsKey(uuid)) {
+            cooldowns.get(uuid).getSecond().cancel();
+        }
+        RepeatingTask task = new RepeatingTask();
+        task.setTask(Bukkit.getScheduler().runTaskLater(Core.getPlugin(), () -> removeCooldown(uuid), time * 20));
+        cooldowns.put(uuid, new LinkedPair<>(new LinkedPair<>(time, Instant.now().getEpochSecond() + time), task));
+
+        Player target = Bukkit.getPlayer(uuid);
+        if (target != null && target.isValid() && target.isOnline()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("{%COOLDOWN_EXPIRE%}", TimeDateUtil.getSimpleDurationStringFromSeconds(time));
+            Message.send(target, Message.msgs.cooldownAdd, map);
+        }
     }
 
     public void addCooldown(UUID uuid, long time) {
+        long initialTime = 0L;
+        if (cooldowns.containsKey(uuid)) {
+            cooldowns.get(uuid).getSecond().cancel();
+            initialTime = cooldowns.get(uuid).getFirst().getFirst();
+        }
         RepeatingTask task = new RepeatingTask();
-        task.setTask(Bukkit.getScheduler().runTaskLater(Core.getPlugin(), () -> cooldowns.remove(uuid), time));
+        task.setTask(Bukkit.getScheduler().runTaskLater(Core.getPlugin(), () -> removeCooldown(uuid), time * 20));
+        cooldowns.put(uuid, new LinkedPair<>(new LinkedPair<>(initialTime + time, Instant.now().getEpochSecond() + initialTime + time), task));
+
+        Player target = Bukkit.getPlayer(uuid);
+        if (target != null && target.isValid() && target.isOnline()) {
+            Map<String, String> map = new HashMap<>();
+            map.put("{%COOLDOWN_EXPIRE%}", TimeDateUtil.getSimpleDurationStringFromSeconds(time));
+            Message.send(target, Message.msgs.cooldownAdd, map);
+        }
     }
 
     public void removeCooldown(UUID uuid) {
@@ -183,6 +213,11 @@ public class PanicManager extends Observer {
             cooldowns.get(uuid).getSecond().cancel();
         }
         cooldowns.remove(uuid);
+
+        Player target = Bukkit.getPlayer(uuid);
+        if (target != null && target.isValid() && target.isOnline()) {
+            Message.send(target, Message.msgs.cooldownExpire);
+        }
     }
 
     public boolean isOnCooldown(UUID uuid) {

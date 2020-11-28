@@ -18,7 +18,7 @@ import java.util.List;
 public class SafemodeCommand extends CommandManager {
 
     public SafemodeCommand() {
-        super("psafemode", "Stops sending panic alerts to webhooks", "famedpanic.safemode", "/safemode [on/off]", "psm");
+        super("psafemode", "Stops sending panic alerts to webhooks", "famedpanic.safemode", "/psafemode [on/off]", "psm");
     }
 
     @Override
