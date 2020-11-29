@@ -18,7 +18,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PanicInspectorCommand extends CommandManager {
-    //todo allow disabling and adding of more aliases in config for each command, probably in separate config file
     public PanicInspectorCommand() {
         super("panicinspector", "Allows a player to enter panic inspector mode", "famedpanic.panicinspector", "/panicinspector <player>", "pi");
     }

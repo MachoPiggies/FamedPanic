@@ -12,7 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PanickingCommand extends CommandManager {
-    //todo create a method for displaying all users in panic mode
+
     public PanickingCommand() {
         super("panicking", "Shows if a player is in panic mode", "famedpanic.panicking", "/panicking <player>");
     }

@@ -55,6 +55,4 @@ public class SafemodeCommand extends CommandManager {
         Collections.sort(completions);
         return completions;
     }
-
-    //todo auto update all files if some settings are missing
 }

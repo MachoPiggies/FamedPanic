@@ -75,5 +75,3 @@ public class PanicData {
         }
     }
 }
-
-//todo: /panicking

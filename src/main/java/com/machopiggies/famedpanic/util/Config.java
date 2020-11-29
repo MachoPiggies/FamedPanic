@@ -72,7 +72,7 @@ public class Config {
         defaults.put("discord.embed.useEmbed", true);
         defaults.put("discord.embed.embedAltEnter", "@everyone {%PLAYER_NAME%} has activated panic mode! Please see to this immediately.");
         defaults.put("discord.embed.embedAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!");
-        defaults.put("discord.embed.colorHEX", 13828351);
+        defaults.put("discord.embed.color", "13828351");
         defaults.put("slack.enabled", false);
         defaults.put("slack.webhookURL", "");
         defaults.put("slack.useBlock", true);
@@ -89,7 +89,7 @@ public class Config {
                 authConfig.getBoolean("discord.embed.useEmbed", true),
                 authConfig.getString("discord.embed.embedAltEnter", "@everyone {%PLAYER_NAME%} has activated panic mode! Please see to this immediately."),
                 authConfig.getString("discord.embed.embedAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!"),
-                authConfig.getInt("discord.embed.colorHEX", 13828351),
+                authConfig.getString("discord.embed.color", "13828351"),
                 authConfig.getBoolean("slack.enabled", false),
                 authConfig.getString("slack.webhookURL", ""),
                 authConfig.getBoolean("slack.useBlock", true)
@@ -190,7 +190,7 @@ public class Config {
         public Slack slack;
 
         public AuthPrefs(boolean discordEnabled, String discordWebhookURL, boolean useEmbed,
-                         String embedAltEnter, String embedAltLeave, int color,
+                         String embedAltEnter, String embedAltLeave, String color,
 
                          boolean slackEnabled, String slackWebhookURL, boolean useBlock
         ) {
@@ -204,9 +204,9 @@ public class Config {
             public boolean useEmbed;
             public String embedAltEnter;
             public String embedAltLeave;
-            public int color;
+            public String color;
 
-            public Discord(boolean enabled, String webhookURL, boolean useEmbed, String embedAltEnter, String embedAltLeave, int color) {
+            public Discord(boolean enabled, String webhookURL, boolean useEmbed, String embedAltEnter, String embedAltLeave, String color) {
                 this.enabled = enabled;
                 this.webhookURL = webhookURL;
                 this.useEmbed = useEmbed;

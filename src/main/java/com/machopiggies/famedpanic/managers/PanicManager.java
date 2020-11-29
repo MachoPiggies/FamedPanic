@@ -20,7 +20,7 @@ public class PanicManager extends Observer {
     private Set<PanicData> panicking;
     private RepeatingTask task;
     private Map<UUID, Pair<Pair<Long, Long>, RepeatingTask>> cooldowns;
-//todo add safemode to config
+
     @Override
     public void onActivate() {
         panicking = new HashSet<>();

@@ -54,6 +54,8 @@ public class Message {
         defaults.put("alerts.inspector-arrival", md.inspectorArrival);
         defaults.put("alerts.cooldown-expire", md.cooldownExpire);
         defaults.put("alerts.cooldown-add", md.cooldownAdd);
+        defaults.put("alerts.in-panic-mode", md.inPanicMode);
+        defaults.put("alerts.not-in-panic-mode", md.notInPanicMode);
 
         defaults.put("protections.interact.no-open", md.noOpen);
         defaults.put("protections.interact.no-drop", md.noDrop);
@@ -68,6 +70,10 @@ public class Message {
         defaults.put("commands.cancelpanic.success", md.cmdCPSuccess);
         defaults.put("commands.cancelpanic.notpanicking", md.cmdCPNotPanicking);
         defaults.put("commands.parsing.invalid-number", md.cmdInvalidNumber);
+        defaults.put("commands.cooldown.nogui.set", md.cmdCooldownSet);
+        defaults.put("commands.cooldown.nogui.remove", md.cmdCooldownRemove);
+        defaults.put("commands.cooldown.nogui.unknown", md.cmdCooldownUnknown);
+        defaults.put("commands.cooldown.nogui.missing", md.cmdCooldownMissing);
         File messages = FileUtil.getYamlFile("messages.yml", file, defaults);
         FileConfiguration yml = YamlConfiguration.loadConfiguration(messages);
 
@@ -100,6 +106,8 @@ public class Message {
                 yml.getString("alerts.inspector-arrival", md.inspectorArrival),
                 yml.getString("alerts.cooldown-expire", md.cooldownExpire),
                 yml.getString("alerts.cooldown-add", md.cooldownAdd),
+                yml.getString("alerts.in-panic-mode", md.inPanicMode),
+                yml.getString("alerts.not-in-panic-mode", md.notInPanicMode),
 
                 yml.getString("protections.interact.no-open", md.noOpen),
                 yml.getString("protections.interact.no-drop", md.noDrop),
@@ -113,8 +121,11 @@ public class Message {
                 yml.getString("protections.no-chat", md.noChat),
                 yml.getString("commands.cancelpanic.success", md.cmdCPSuccess),
                 yml.getString("commands.cancelpanic.notpanicking", md.cmdCPNotPanicking),
-
-                yml.getString("commands.parsing.invalid-number", md.cmdInvalidNumber)
+                yml.getString("commands.parsing.invalid-number", md.cmdInvalidNumber),
+                yml.getString("commands.cooldown.nogui.set", md.cmdCooldownSet),
+                yml.getString("commands.cooldown.nogui.remove", md.cmdCooldownRemove),
+                yml.getString("commands.cooldown.nogui.unknown", md.cmdCooldownUnknown),
+                yml.getString("commands.cooldown.nogui.missing", md.cmdCooldownMissing)
         );
 
         if (!initial) {
@@ -219,7 +230,7 @@ public class Message {
         public String cooldownExpire = "{%PREFIX%}&7You can use panic again!";
         public String cooldownAdd = "{%PREFIX%}&7You are on panic cooldown for &c{%COOLDOWN_EXPIRE%}&7!";
         public String inPanicMode = "{%PREFIX%}&c{%TARGET_NAME%} &7is in panic mode!";
-        public String notInPanicMode = "{%PREFIX%}&c{%TARGET_NAME%} &7 is not in panic mode!";
+        public String notInPanicMode = "{%PREFIX%}&c{%TARGET_NAME%} &7is not in panic mode!";
 
         public String noOpen = "{%PREFIX%}&7You cannot open containers whilst in panic mode!";
         public String noDrop = "{%PREFIX%}&7You cannot drop items whilst in panic mode!";
@@ -233,8 +244,11 @@ public class Message {
         public String noChat = "{%PREFIX%}&7You cannot chat whilst in panic mode!";
         public String cmdCPSuccess = "{%PREFIX%}&7Successfully cancelled &c{%TARGET_NAME%}&7's panic status!";
         public String cmdCPNotPanicking = "{%PREFIX%}&c{%TARGET_NAME%} &7is not in panic mode!";
-
-        public String cmdInvalidNumber = "{%PREFIX%}&c{%TARGET_NAME%} &7 is not a number!";
+        public String cmdInvalidNumber = "{%PREFIX%}&7You did not specify a valid number!";
+        public String cmdCooldownSet = "{%PREFIX%}&c{%TARGET_NAME%} &7is now on cooldown for &c{%DURATION%}&7!";
+        public String cmdCooldownRemove = "{%PREFIX%}&c{%TARGET_NAME%}&7's cooldown has been removed!";
+        public String cmdCooldownUnknown = "{%PREFIX%}&7Unknown operation '&c{%OPERATION%}&7', 2nd argument must be either set/add/remove!";
+        public String cmdCooldownMissing = "{%PREFIX%}&7Missing operation, please select either set/add/remove!";
 
         public Messages(String prefix, String emergencyPrefix, String noPermission, String mAPlayer, String setSafemodeOn,
                         String setSafemodeOff, String safemodeOn, String safemodeOff,
@@ -244,13 +258,14 @@ public class Message {
                         String resetSuccess, String panicWhilstSpec, String specWhilstPanic,
                         String inspectorEnter, String inspectorLeave, String inspectorDisabled,
                         String inspectorKick, String inspectorArrival, String cooldownExpire, String cooldownAdd,
+                        String inPanicMode, String notInPanicMode,
 
                         String noOpen, String noDrop, String noMisc,
                         String noBlockBreak, String noBlockPlace, String noVehicleUse,
                         String noDamager, String noDamagee, String noCommands,
                         String noChat, String cmdCPSuccess, String cmdCPNotPanicking,
-
-                        String cmdInvalidNumber) {
+                        String cmdInvalidNumber, String cmdCooldownSet, String cmdCooldownRemove,
+                        String cmdCooldownUnknown, String cmdCooldownMissing) {
             this.prefix = prefix;
             this.emergencyPrefix = emergencyPrefix;
             this.noPermission = noPermission;
@@ -279,6 +294,8 @@ public class Message {
             this.inspectorArrival = inspectorArrival;
             this.cooldownExpire = cooldownExpire;
             this.cooldownAdd = cooldownAdd;
+            this.inPanicMode = inPanicMode;
+            this.notInPanicMode = notInPanicMode;
 
             this.noOpen = noOpen;
             this.noDrop = noDrop;
@@ -293,6 +310,10 @@ public class Message {
             this.cmdCPSuccess = cmdCPSuccess;
             this.cmdCPNotPanicking = cmdCPNotPanicking;
             this.cmdInvalidNumber = cmdInvalidNumber;
+            this.cmdCooldownSet = cmdCooldownSet;
+            this.cmdCooldownRemove = cmdCooldownRemove;
+            this.cmdCooldownUnknown = cmdCooldownUnknown;
+            this.cmdCooldownMissing = cmdCooldownMissing;
         }
 
         public Messages() { }

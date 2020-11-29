@@ -20,8 +20,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PanicCooldownCommand extends CommandManager {
-    //todo for some reason, command aliases arent tabcompleting
-
     private static Map<Player, Long> timeCache = new HashMap<>();
 
     public PanicCooldownCommand() {
@@ -30,7 +28,6 @@ public class PanicCooldownCommand extends CommandManager {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        //todo allow players to make specific files that pertain to editing these menus
         if (sender instanceof Player && Config.settings.guis.enabled) {
             if (permissable(sender)) {
                 Player target = null;
@@ -52,11 +49,88 @@ public class PanicCooldownCommand extends CommandManager {
                 Message.send(sender, Message.msgs.noPermission);
             }
         } else {
-            // todo not guis method
+            if (permissable(sender)) {
+                Player target = null;
 
+                if (args.length > 0) {
+                    Player local = Bukkit.getPlayer(args[0]);
+                    if (local != null && local.isOnline() && local.isValid()) {
+                        target = local;
+                    }
+                }
+                if (target != null) {
+                    if (args.length == 2) {
+                        if (args[1].equalsIgnoreCase("remove")) {
+                            if (Core.getPanicManager().isOnCooldown(target.getUniqueId())) {
+                                Core.getPanicManager().removeCooldown(target.getUniqueId());
+
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                Message.send(sender, Message.msgs.cmdCooldownRemove, map);
+                            } else {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                Message.send(sender, Message.msgs.notInPanicMode, map);
+                            }
+                        }
+                    } else if (args.length > 2) {
+                        if (!args[1].equalsIgnoreCase("remove")) {
+                            long time;
+                            try {
+                                time = Integer.parseInt(args[2]);
+                            } catch (NumberFormatException e) {
+                                Message.send(sender, Message.msgs.cmdInvalidNumber);
+                                return super.onCommand(sender, command, s, args);
+                            }
+
+                            if (args[1].equalsIgnoreCase("add")) {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                map.put("{%DURATION%}", TimeDateUtil.getSimpleDurationStringFromSeconds(Core.getPanicManager().getCooldownLength(target.getUniqueId()) + time));
+                                Message.send(sender, Message.msgs.cmdCooldownSet, map);
+
+                                Core.getPanicManager().addCooldown(target.getUniqueId(), time);
+                            } else if (args[1].equalsIgnoreCase("set")) {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                map.put("{%DURATION%}", TimeDateUtil.getSimpleDurationStringFromSeconds(time));
+                                Message.send(sender, Message.msgs.cmdCooldownSet, map);
+
+                                Core.getPanicManager().setCooldown(target.getUniqueId(), time);
+                            } else {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%OPERATION%}", args[1]);
+                                Message.send(sender, Message.msgs.cmdCooldownUnknown, map);
+                            }
+                        } else {
+                            if (Core.getPanicManager().isOnCooldown(target.getUniqueId())) {
+                                Core.getPanicManager().removeCooldown(target.getUniqueId());
+
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                Message.send(sender, Message.msgs.cmdCooldownRemove, map);
+                            } else {
+                                Map<String, String> map = new HashMap<>();
+                                map.put("{%TARGET_NAME%}", target.getName());
+                                map.put("{%TARGET_DISPLAYNAME%}", target.getDisplayName());
+                                Message.send(sender, Message.msgs.notInPanicMode, map);
+                            }
+                        }
+                    } else {
+                        Message.send(sender, Message.msgs.cmdCooldownMissing);
+                    }
+                } else {
+                    Message.send(sender, Message.msgs.mAPlayer);
+                }
+            } else {
+                Message.send(sender, Message.msgs.noPermission);
+            }
         }
-
-        //todo playernotfound message and differentiate in all commands
 
         return super.onCommand(sender, command, s, args);
     }

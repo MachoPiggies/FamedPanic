@@ -17,7 +17,6 @@ public class CancelPanicCommand extends CommandManager {
         super("cancelpanic", "Allows player to cancel another players panic", "famedpanic.panic.cancel", "/cp");
     }
 
-    //todo allow this to work cross-network through plugin messaging
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         if (sender instanceof Player) {
