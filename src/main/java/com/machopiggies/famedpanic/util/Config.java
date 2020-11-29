@@ -1,5 +1,7 @@
 package com.machopiggies.famedpanic.util;
 
+import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.gui.StainedMaterialColor;
 import jdk.javadoc.internal.doclets.formats.html.AllClassesIndexWriter;
@@ -22,6 +24,8 @@ public class Config {
     public static Settings settings;
     private static File dEJson = null;
     private static File dLJson = null;
+    private static File sEJson = null;
+    private static File sLJson = null;
     private static boolean safemode;
 
     public static boolean isSafemode() {
@@ -39,6 +43,13 @@ public class Config {
     }
     public static File getDLJson() {
         return dLJson;
+    }
+
+    public static File getSEJson() {
+        return sEJson;
+    }
+    public static File getSLJson() {
+        return sLJson;
     }
 
     public static void initialize() {
@@ -75,7 +86,9 @@ public class Config {
         defaults.put("discord.embed.color", "13828351");
         defaults.put("slack.enabled", false);
         defaults.put("slack.webhookURL", "");
-        defaults.put("slack.useBlock", true);
+        defaults.put("slack.block.useBlock", true);
+        defaults.put("slack.block.blockAltEnter", "@channel {%PLAYER_NAME%} has activated panic mode! Please see to this immediately.");
+        defaults.put("slack.block.blockAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!");
         File auth = FileUtil.getYamlFile("auth.yml", Core.getPlugin().getDataFolder(), defaults);
         YamlConfiguration authConfig = YamlConfiguration.loadConfiguration(auth);
 
@@ -92,12 +105,22 @@ public class Config {
                 authConfig.getString("discord.embed.color", "13828351"),
                 authConfig.getBoolean("slack.enabled", false),
                 authConfig.getString("slack.webhookURL", ""),
-                authConfig.getBoolean("slack.useBlock", true)
+                authConfig.getBoolean("slack.block.useBlock", true),
+                authConfig.getString("slack.block.blockAltEnter", "@channel {%PLAYER_NAME%} has activated panic mode! Please see to this immediately."),
+                authConfig.getString("slack.block.blockAltLeave", "{%PLAYER_NAME%} has deactivated panic mode!")
         );
 
         File embedsFolder = FileUtil.getFolder("embeds", Core.getPlugin().getDataFolder());
         Config.dEJson = FileUtil.getJsonFile("discordEnter.json", embedsFolder, Core.getPlugin().getResource("discordEnter.json"));
         Config.dLJson = FileUtil.getJsonFile("discordLeave.json", embedsFolder, Core.getPlugin().getResource("discordLeave.json"));
+        Config.sEJson = FileUtil.getJsonFile("slackEnter.json", embedsFolder, Core.getPlugin().getResource("slackEnter.json"));
+        Config.sLJson = FileUtil.getJsonFile("slackLeave.json", embedsFolder, Core.getPlugin().getResource("slackLeave.json"));
+        Logger.warn("1: " + sLJson.toString());
+        try {
+            Logger.warn("2: " + new JsonParser().parse(new JsonReader(new FileReader(Config.getSLJson()))).toString());
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public static boolean isDebugMode() {
@@ -192,10 +215,11 @@ public class Config {
         public AuthPrefs(boolean discordEnabled, String discordWebhookURL, boolean useEmbed,
                          String embedAltEnter, String embedAltLeave, String color,
 
-                         boolean slackEnabled, String slackWebhookURL, boolean useBlock
+                         boolean slackEnabled, String slackWebhookURL, boolean useBlock,
+                         String blockAltEnter, String blockAltLeave
         ) {
             discord = new Discord(discordEnabled, discordWebhookURL, useEmbed, embedAltEnter, embedAltLeave, color);
-            slack = new Slack(slackEnabled, slackWebhookURL, useBlock);
+            slack = new Slack(slackEnabled, slackWebhookURL, useBlock, blockAltEnter, blockAltLeave);
         }
 
         public static class Discord {
@@ -220,11 +244,16 @@ public class Config {
             public boolean enabled;
             public String webhookURL;
             public boolean useBlock;
+            public String blockAltEnter;
+            public String blockAltLeave;
 
-            public Slack(boolean enabled, String webhookURL, boolean useBlock) {
+            public Slack(boolean enabled, String webhookURL, boolean useBlock, String blockAltEnter, String blockAltLeave) {
                 this.enabled = enabled;
                 this.webhookURL = webhookURL;
                 this.useBlock = useBlock;
+                this.blockAltEnter = blockAltEnter;
+                this.blockAltLeave = blockAltLeave;
+
             }
         }
     }

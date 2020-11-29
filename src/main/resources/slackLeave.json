@@ -1,0 +1,14 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*{%PLAYER_NAME%}* is no longer in panic mode!"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 package com.machopiggies.famedpanic.util;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.lang.ObjectUtils;
@@ -58,7 +59,7 @@ public class HTTPRequest {
         }
     }
 
-    public JsonObject sendPOST() {
+    public JsonElement sendPOST() {
         try {
             if (url != null) {
                 URL urlObj = new URL(url);
@@ -84,7 +85,7 @@ public class HTTPRequest {
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
                     try {
-                        return (JsonObject) new JsonParser().parse(in.readLine());
+                        return new JsonParser().parse(in.readLine());
                     } catch (NullPointerException e) {
                         return null;
                     }

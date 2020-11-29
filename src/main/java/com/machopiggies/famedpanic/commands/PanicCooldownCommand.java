@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PanicCooldownCommand extends CommandManager {
-    private static Map<Player, Long> timeCache = new HashMap<>();
+    private static final Map<Player, Long> timeCache = new HashMap<>();
 
     public PanicCooldownCommand() {
         super("paniccooldown", "Shows remaining panic cooldown", "famedpanic.cooldown", "/paniccooldown <player>", "pcooldown");

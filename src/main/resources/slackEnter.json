@@ -1,0 +1,57 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "@channel :rotating_light: *Panic Alert* :rotating_light:\n\n{%PLAYER_NAME%} has activated panic mode! Please see to this immediately.\n\n{%VOLATILE_BUNGEE_COMMAND%}\n\n"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Player (UUID)*\n{%PLAYER_NAME%} ({%PLAYER_UUID%})"
+      },
+      "accessory": {
+        "type": "image",
+        "image_url": "https://api.hylaria.com/players/skull/MachoPiggies",
+        "alt_text": "{%PLAYER_NAME%}"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Display Name*\n{PLAYER_DISPLAYNAME}"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Server (Bungee)*\n{%BUNGEE_SERVER_NAME%} ({%BUNGEE_SERVER_COMMAND%})"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Time*\n{%TIME%}"
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Location*\nWorld: {%WORLD%}\nX: {%LOCATION_X%}\nY: {%LOCATION_Y%}\nZ: {%LOCATION_Z%}"
+      }
+    },
+    {
+      "type": "divider"
+    }
+  ]
+}

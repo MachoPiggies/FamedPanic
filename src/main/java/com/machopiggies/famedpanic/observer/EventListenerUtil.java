@@ -37,15 +37,6 @@ public class EventListenerUtil extends Observer {
         observers = null;
     }
 
-    @EventHandler
-    public void onPluginDisable(PluginDisableEvent e) {
-        Class<? extends Plugin> pluginClass = e.getPlugin().getClass();
-
-        ObserverUtil.deactivate(observers.get(pluginClass));
-
-        observers.remove(pluginClass);
-    }
-
     @SuppressWarnings({"beta", "UnstableApiUsage"})
     private List<Observer> getObservers(Plugin plugin) {
         List<Observer> Observers = new ArrayList<>();

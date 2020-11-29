@@ -74,6 +74,28 @@ public class ContactManager extends Observer {
                 http.sendPOST();
             }
         }
+        if (Config.authPrefs.slack.enabled) {
+            if (Config.authPrefs.slack.useBlock) {
+                String json = "undefined";
+                try {
+                    json = new JsonParser().parse(new JsonReader(new FileReader(Config.getSEJson()))).toString();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                json = convertPlaceholders(json, data);
+                HTTPRequest http = new HTTPRequest(Config.auth.slack);
+                http.addBody(new JsonParser().parse(json).getAsJsonObject());
+                http.sendPOST();
+            } else {
+                JsonObject jsonObj = new JsonObject();
+                jsonObj.addProperty("text", Config.authPrefs.slack.blockAltEnter);
+                String json = new Gson().toJson(jsonObj);
+                json = convertPlaceholders(json, data);
+                HTTPRequest http = new HTTPRequest(Config.auth.slack);
+                http.addBody(new JsonParser().parse(json).getAsJsonObject());
+                http.sendPOST();
+            }
+        }
     }
 
     public void exitAnnounce(PanicData data) {
@@ -103,6 +125,29 @@ public class ContactManager extends Observer {
                 String json = new Gson().toJson(jsonObj);
                 json = convertPlaceholders(json, data);
                 HTTPRequest http = new HTTPRequest(Config.auth.discord);
+                http.addBody(new JsonParser().parse(json).getAsJsonObject());
+                http.sendPOST();
+            }
+        }
+        if (Config.authPrefs.slack.enabled) {
+            if (Config.authPrefs.slack.useBlock) {
+                String json = "undefined";
+                try {
+                    json = new JsonParser().parse(new JsonReader(new FileReader(Config.getSLJson()))).toString();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+                Logger.warn(json);
+                json = convertPlaceholders(json, data);
+                HTTPRequest http = new HTTPRequest(Config.auth.slack);
+                http.addBody(new JsonParser().parse(json).getAsJsonObject());
+                http.sendPOST();
+            } else {
+                JsonObject jsonObj = new JsonObject();
+                jsonObj.addProperty("text", Config.authPrefs.slack.blockAltLeave);
+                String json = new Gson().toJson(jsonObj);
+                json = convertPlaceholders(json, data);
+                HTTPRequest http = new HTTPRequest(Config.auth.slack);
                 http.addBody(new JsonParser().parse(json).getAsJsonObject());
                 http.sendPOST();
             }
