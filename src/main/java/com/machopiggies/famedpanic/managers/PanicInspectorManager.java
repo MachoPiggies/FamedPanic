@@ -80,7 +80,7 @@ public class PanicInspectorManager extends Observer {
         player.performCommand(Config.settings.panicInspector.vanishCmd);
         player.setGameMode(GameMode.SPECTATOR);
         player.teleport(data.target.getLocation(), PlayerTeleportEvent.TeleportCause.SPECTATE);
-        player.setMetadata("panickinspector", new FixedMetadataValue(Core.getPlugin(), data.time));
+        player.setMetadata("panicinspector", new FixedMetadataValue(Core.getPlugin(), data.time));
         Message.send(player, Message.msgs.inspectorEnter);
         if (Config.settings.panicInspector.inspectorAlert) {
             Map<String, String> map = new HashMap<>();
@@ -163,8 +163,8 @@ public class PanicInspectorManager extends Observer {
 
     private void remove(Player player, InspectorData data, String message, Map<String, String> placeholders) {
 
-        if (player.hasMetadata("panickinspector")) {
-            player.removeMetadata("panickinspector", Core.getPlugin());
+        if (player.hasMetadata("panicinspector")) {
+            player.removeMetadata("panicinspector", Core.getPlugin());
         }
         if (data != null) {
             player.setGameMode(data.gamemode);

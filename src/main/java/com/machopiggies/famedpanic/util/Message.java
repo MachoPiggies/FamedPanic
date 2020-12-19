@@ -40,7 +40,9 @@ public class Message {
         defaults.put("general.safemode.off", md.safemodeOff);
         defaults.put("alerts.announce-enter", md.announceEnter);
         defaults.put("alerts.announce-enter-inspectorclick", md.announceEnterInspector);
+        defaults.put("alerts.announce-enter-bungeeclick", md.announceEnterBungee);
         defaults.put("alerts.announce-enter-inspectorclick-hover", md.announceEnterInspectorHover);
+        defaults.put("alerts.announce-enter-bungeeclick-hover", md.announceEnterBungeeHover);
         defaults.put("alerts.announce-leave", md.announceLeave);
         defaults.put("alerts.enabled", md.enabled);
         defaults.put("alerts.enabled-safemode", md.enabledSafemode);
@@ -92,7 +94,9 @@ public class Message {
                 yml.getString("general.safemode.off", md.safemodeOff),
                 yml.getString("alerts.announce-enter", md.announceEnter),
                 yml.getString("alerts.announce-enter-inspectorclick", md.announceEnterInspector),
+                yml.getString("alerts.announce-enter-bungeeclick", md.announceEnterBungee),
                 yml.getString("alerts.announce-enter-inspectorclick-hover", md.announceEnterInspectorHover),
+                yml.getString("alerts.announce-enter-bungeeclick-hover", md.announceEnterBungeeHover),
                 yml.getString("alerts.announce-leave", md.announceLeave),
                 yml.getString("alerts.enabled", md.enabled),
                 yml.getString("alerts.enabled-safemode", md.enabledSafemode),
@@ -232,7 +236,9 @@ public class Message {
         public String safemodeOff = "{%PREFIX%}&7Safemode is turned &coff&7!";
         public String announceEnter = "{%EMERGENCY_PREFIX%}&c{%PLAYER_DISPLAYNAME%} &ehas activated panic mode! Please investigate immediately.";
         public String announceEnterInspector = "&6&lCLICK TO TELEPORT!";
+        public String announceEnterBungee = "You need to transfer to {%BUNGEE_SERVER%} by clicking &6&lHERE&7!";
         public String announceEnterInspectorHover = "&6You will enter inspector mode!";
+        public String announceEnterBungeeHover = "&6You will be sent to {%BUNGEE_SERVER%}!";
         public String announceLeave = "{%EMERGENCY_PREFIX%}&c{%PLAYER_DISPLAYNAME%} &eis no longer in panic mode!";
         public String enabled = "{%PREFIX%}&7You have entered panic mode! Staff have been alerted and will be with you momentarily.";
         public String enabledSafemode = "{%PREFIX%}&7You have entered panic mode! The system is in safemode, this means staff have NOT been notified externally, you may need to direct message a staff member instead of waiting.";
@@ -273,7 +279,8 @@ public class Message {
 
         public Messages(String prefix, String emergencyPrefix, String noPermission, String mAPlayer, String setSafemodeOn,
                         String setSafemodeOff, String safemodeOn, String safemodeOff,
-                        String announceEnter, String announceEnterInspector, String announceEnterInspectorHover,
+                        String announceEnter, String announceEnterInspector, String announceEnterBungee,
+                        String announceEnterInspectorHover, String announceEnterBungeeHover,
                         String announceLeave, String enabled, String enabledSafemode,
                         String disabled, String staffDisabled, String onCooldown, String forcedOut,
                         String resetSuccess, String panicWhilstSpec, String specWhilstPanic,
@@ -297,7 +304,9 @@ public class Message {
             this.safemodeOff = safemodeOff;
             this.announceEnter = announceEnter;
             this.announceEnterInspector = announceEnterInspector;
+            this.announceEnterBungee = announceEnterBungee;
             this.announceEnterInspectorHover = announceEnterInspectorHover;
+            this.announceEnterBungeeHover = announceEnterBungeeHover;
             this.announceLeave = announceLeave;
             this.enabled = enabled;
             this.enabledSafemode = enabledSafemode;

@@ -2,10 +2,8 @@ package com.machopiggies.famedpanic;
 
 import com.machopiggies.famedpanic.commands.CommandManager;
 import com.machopiggies.famedpanic.gui.GuiManager;
-import com.machopiggies.famedpanic.managers.APIManager;
-import com.machopiggies.famedpanic.managers.ContactManager;
-import com.machopiggies.famedpanic.managers.PanicInspectorManager;
-import com.machopiggies.famedpanic.managers.PanicManager;
+import com.machopiggies.famedpanic.managers.*;
+import com.machopiggies.famedpanic.managers.bungee.BungeeManager;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.observer.EventListenerUtil;
 import com.machopiggies.famedpanic.observer.Observer;
@@ -50,6 +48,11 @@ public class Core extends JavaPlugin {
         return guiManager;
     }
 
+    private static BungeeManager bungeeManager;
+    public static BungeeManager getBungeeManager() {
+        return bungeeManager;
+    }
+
     private static APIManager apiManager;
     public static APIManager getApiManager() {
         return apiManager;
@@ -84,6 +87,11 @@ public class Core extends JavaPlugin {
                 Bukkit.getPluginManager().disablePlugin(api);
                 Logger.debug(api.getDescription().getName() + " v" + api.getDescription().getVersion() + " has been disabled due to API usage being turned off! Loading as standalone...");
             }
+        }
+
+        if (Config.settings.bungee) {
+            Observer.activate(this, Collections.singletonList(bungeeManager = new BungeeManager()));
+            Logger.debug(api.getDescription().getName() + " v" + api.getDescription().getVersion() + " hooking onto bungeecord!");
         }
 
         eventListenerUtil.registerListeners(this);
