@@ -238,7 +238,7 @@ public class Message {
         public String announceEnterInspector = "&6&lCLICK TO TELEPORT!";
         public String announceEnterBungee = "You need to transfer to {%BUNGEE_SERVER%} by clicking &6&lHERE&7!";
         public String announceEnterInspectorHover = "&6You will enter inspector mode!";
-        public String announceEnterBungeeHover = "&6You will be sent to {%BUNGEE_SERVER%}!";
+        public String announceEnterBungeeHover = "&cTHE PLUGIN WILL NOT VANISH YOU BEFORE YOU ENTER THE SERVER, DO THAT NOW!";
         public String announceLeave = "{%EMERGENCY_PREFIX%}&c{%PLAYER_DISPLAYNAME%} &eis no longer in panic mode!";
         public String enabled = "{%PREFIX%}&7You have entered panic mode! Staff have been alerted and will be with you momentarily.";
         public String enabledSafemode = "{%PREFIX%}&7You have entered panic mode! The system is in safemode, this means staff have NOT been notified externally, you may need to direct message a staff member instead of waiting.";
