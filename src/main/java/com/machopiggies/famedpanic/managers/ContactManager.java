@@ -3,10 +3,7 @@ package com.machopiggies.famedpanic.managers;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonStreamParser;
 import com.google.gson.stream.JsonReader;
-import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.observer.Observer;
 import com.machopiggies.famedpanic.util.*;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -17,16 +14,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStreamReader;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ContactManager extends Observer {
 
@@ -36,7 +31,7 @@ public class ContactManager extends Observer {
                 Map<String, String> map = new HashMap<>();
                 map.put("{%PLAYER_NAME%}", data.player.getName());
                 map.put("{%PLAYER_DISPLAYNAME%}", data.player.getName());
-                if (Config.settings.allowStaffTeleport && Config.settings.panicInspector.enabled) {
+                if (Config.settings.allowStaffTeleport && Config.settings.panicInspector.enabled && player.hasPermission("famedpanic.inspector")) {
                     BaseComponent[] base = TextComponent.fromLegacyText(Message.format(Message.msgs.announceEnter, map));
                     BaseComponent[] btn = TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', Message.msgs.announceEnterInspector));
                     BaseComponent[] space = new BaseComponent[]{new TextComponent(" ")};
@@ -58,7 +53,8 @@ public class ContactManager extends Observer {
                 try {
                     json = new JsonParser().parse(new JsonReader(new FileReader(Config.getDEJson()))).toString();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to parse '" + Config.getDEJson().getPath() + "'. Please try validating your JSON @ https://jsonformatter.curiousconcept.com/ or contact the plugin developer with the following log and your JSON file. [Created error log at " + file.getPath() + "]");
                 }
                 json = convertPlaceholders(json, data);
                 HTTPRequest http = new HTTPRequest(Config.auth.discord);
@@ -80,7 +76,8 @@ public class ContactManager extends Observer {
                 try {
                     json = new JsonParser().parse(new JsonReader(new FileReader(Config.getSEJson()))).toString();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to parse '" + Config.getSEJson().getPath() + "'. Please try validating your JSON @ https://jsonformatter.curiousconcept.com/ or contact the plugin developer with the following log and your JSON file. [Created error log at " + file.getPath() + "]");
                 }
                 json = convertPlaceholders(json, data);
                 HTTPRequest http = new HTTPRequest(Config.auth.slack);
@@ -113,7 +110,8 @@ public class ContactManager extends Observer {
                 try {
                     json = new JsonParser().parse(new JsonReader(new FileReader(Config.getDLJson()))).toString();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to parse '" + Config.getDLJson().getPath() + "'. Please try validating your JSON @ https://jsonformatter.curiousconcept.com/ or contact the plugin developer with the following log and your JSON file. [Created error log at " + file.getPath() + "]");
                 }
                 json = convertPlaceholders(json, data);
                 HTTPRequest http = new HTTPRequest(Config.auth.discord);
@@ -135,9 +133,9 @@ public class ContactManager extends Observer {
                 try {
                     json = new JsonParser().parse(new JsonReader(new FileReader(Config.getSLJson()))).toString();
                 } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to parse '" + Config.getSLJson().getPath() + "'. Please try validating your JSON @ https://jsonformatter.curiousconcept.com/ or contact the plugin developer with the following log and your JSON file. [Created error log at " + file.getPath() + "]");
                 }
-                Logger.warn(json);
                 json = convertPlaceholders(json, data);
                 HTTPRequest http = new HTTPRequest(Config.auth.slack);
                 http.addBody(new JsonParser().parse(json).getAsJsonObject());
@@ -157,7 +155,7 @@ public class ContactManager extends Observer {
     private String convertPlaceholders(String input, PanicData data) {
         input = input.replace("{%PLAYER_NAME%}", data.player.getName());
         input = input.replace("{%PLAYER_UUID%}", data.player.getUniqueId().toString());
-        input = input.replace("{%PLAYER_DISPLAY_NAME%}", ChatColor.stripColor(data.player.getDisplayName()));
+        input = input.replace("{%PLAYER_DISPLAYNAME%}", ChatColor.stripColor(data.player.getDisplayName()));
         input = input.replace("{%PLAYER_FACE%}", MiscUtil.getPlayerFace(data.player.getName()));
         input = input.replace("{%VOLATILE_BUNGEE_SERVER%}", Config.settings.bungee ? Bukkit.getServer().getName() : "");
         input = input.replace("{%VOLATILE_BUNGEE_COMMAND%}", Config.settings.bungee ? "/server " + Bukkit.getServer().getName() : "");

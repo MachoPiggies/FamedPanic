@@ -1,17 +1,20 @@
 package com.machopiggies.famedpanic.util;
 
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
 import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.gui.StainedMaterialColor;
-import jdk.javadoc.internal.doclets.formats.html.AllClassesIndexWriter;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Config {
 
@@ -33,9 +36,25 @@ public class Config {
     }
 
     public static void setSafemode(boolean safemode) {
-        Config.safemode = safemode;
-        getConfig().set("safemode", safemode);
-        Core.getPlugin().saveConfig();
+        if (safemode != Config.safemode) {
+            if (Core.getApi() != null) {
+                Event event = null;
+                try {
+                    Constructor<?> eventConstructor = Class.forName("com.machopiggies.famedpanicapi.events.SafemodeChangedEvent").getConstructor(boolean.class);
+                    event = (Event) eventConstructor.newInstance(safemode);
+                } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) { }
+
+                if (event != null) {
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (((Cancellable) event).isCancelled()) {
+                        return;
+                    }
+                }
+            }
+            Config.safemode = safemode;
+            getConfig().set("safemode", safemode);
+            Core.getPlugin().saveConfig();
+        }
     }
 
     public static File getDEJson() {
@@ -115,16 +134,14 @@ public class Config {
         Config.dLJson = FileUtil.getJsonFile("discordLeave.json", embedsFolder, Core.getPlugin().getResource("discordLeave.json"));
         Config.sEJson = FileUtil.getJsonFile("slackEnter.json", embedsFolder, Core.getPlugin().getResource("slackEnter.json"));
         Config.sLJson = FileUtil.getJsonFile("slackLeave.json", embedsFolder, Core.getPlugin().getResource("slackLeave.json"));
-        Logger.warn("1: " + sLJson.toString());
-        try {
-            Logger.warn("2: " + new JsonParser().parse(new JsonReader(new FileReader(Config.getSLJson()))).toString());
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+
+        if (getConfig().getBoolean("errors.deleteOldErrors")) {
+            deleteDeadErrors();
         }
     }
 
     public static boolean isDebugMode() {
-        return true;
+        return getConfig().getBoolean("debug", false);
     }
 
     public static class Settings {
@@ -256,5 +273,24 @@ public class Config {
 
             }
         }
+    }
+
+    private static void deleteDeadErrors() {
+        File errors = FileUtil.getFolder("errors", Core.getPlugin().getDataFolder());
+        try {
+            int success = 0;
+            int fail = 0;
+            for (File file : Objects.requireNonNull(errors.listFiles())) {
+                if (System.currentTimeMillis() - file.lastModified() > getConfig().getLong("errors.daysUntilDeletion", 5) * 86400000) {
+                    if (file.delete()) {
+                        success++;
+                    } else {
+                        fail++;
+                    }
+                }
+            }
+
+            Logger.debug("Attempted to delete old error logs! Success: " + success + " / Failed: " + fail);
+        } catch (Exception ignored) { }
     }
 }

@@ -4,14 +4,12 @@ import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.gui.MenuInterface;
 import com.machopiggies.famedpanic.gui.button.MenuInterfaceButton;
 import com.machopiggies.famedpanic.util.*;
-import com.mysql.jdbc.TimeUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.StringUtil;
 
@@ -23,7 +21,7 @@ public class PanicCooldownCommand extends CommandManager {
     private static final Map<Player, Long> timeCache = new HashMap<>();
 
     public PanicCooldownCommand() {
-        super("paniccooldown", "Shows remaining panic cooldown", "famedpanic.cooldown", "/paniccooldown <player>", "pcooldown");
+        super("paniccooldown", "Shows remaining panic cooldown", "famedpanic.cooldown", "/paniccooldown <player> [set/add/remove] [seconds]", "pcooldown");
     }
 
     @Override

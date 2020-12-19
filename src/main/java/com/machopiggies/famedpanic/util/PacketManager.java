@@ -1,9 +1,9 @@
 package com.machopiggies.famedpanic.util;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
@@ -33,32 +33,8 @@ public class PacketManager {
                 sendPacket(player, packet);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void sendActionbarMessage(Player player, String message) {
-        try {
-            if(message != null) {
-                Object chatSerializer = Objects.requireNonNull(getClassNMS("IChatBaseComponent")).getDeclaredClasses()[0].getMethod("a", String.class).invoke(null, message);
-                Constructor<?> actionbarConstructor = Objects.requireNonNull(getClassNMS("PacketPlayOutChat")).getConstructor(getClassNMS("IChatBaseComponent"), byte.class);
-                Object packet = actionbarConstructor.newInstance(chatSerializer, (byte) 2);
-                sendPacket(player, packet);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void sendActionbarMessageWithICBC(Player player, Object message) {
-        try {
-            if(message != null) {
-                Constructor<?> actionbarConstructor = Objects.requireNonNull(getClassNMS("PacketPlayOutChat")).getConstructor(getClassNMS("IChatBaseComponent"), byte.class);
-                Object packet = actionbarConstructor.newInstance(Objects.requireNonNull(getClassNMS("IChatBaseComponent")).cast(message), (byte) 2);
-                sendPacket(player, packet);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+            File file = Logger.createErrorLog(e, "nested nms error");
+            Logger.severe("An error occurred whilst trying to distinguish a packet. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
         }
     }
 
@@ -68,7 +44,8 @@ public class PacketManager {
             Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
             playerConnection.getClass().getMethod("sendPacket", getClassNMS("Packet")).invoke(playerConnection, packet);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
-            e.printStackTrace();
+            File file = Logger.createErrorLog(e, "nested nms error");
+            Logger.severe("An error occurred whilst trying to distinguish a packet. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
         }
     }
 
@@ -87,14 +64,16 @@ public class PacketManager {
                 try {
                     return Class.forName("org.bukkit.craftbukkit." + version + "." + extra + methodName);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "class not found");
+                    Logger.severe("An error occurred whilst trying to distinguish a packet. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
                     return null;
                 }
             case MINECRAFT:
                 try {
                     return Class.forName("net.minecraft.server." + version + "." + extra + methodName);
                 } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "class not found");
+                    Logger.severe("An error occurred whilst trying to distinguish a packet. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
                     return null;
                 }
             default:

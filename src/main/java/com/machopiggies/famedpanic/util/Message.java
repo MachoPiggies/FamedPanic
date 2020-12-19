@@ -3,14 +3,18 @@ package com.machopiggies.famedpanic.util;
 import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.commands.CommandManager;
 import net.md_5.bungee.api.chat.BaseComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class Message {
@@ -177,14 +181,31 @@ public class Message {
         return format(message, null);
     }
 
+    @SuppressWarnings("unchecked")
     public static String format(String message, Map<String, String> placeholders) {
-        message = message.replace("{%PREFIX%}", msgs.prefix);
-        message = message.replace("{%EMERGENCY_PREFIX%}", msgs.emergencyPrefix);
-        if (placeholders != null) {
-            for (Map.Entry<String, String> entry : placeholders.entrySet()) {
-                message = message.replace(entry.getKey(), entry.getValue());
+        placeholders = placeholders != null ? placeholders : new HashMap<>();
+        placeholders.put("{%PREFIX%}", msgs.prefix);
+        placeholders.put("{%EMERGENCY_PREFIX%}", msgs.emergencyPrefix);
+        if (Core.getApi() != null) {
+            Event event = null;
+            try {
+                Constructor<?> eventConstructor = Class.forName("com.machopiggies.famedpanicapi.events.MessageParsingEvent").getConstructor(String.class, Map.class);
+                event = (Event) eventConstructor.newInstance(message, placeholders);
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) { }
+
+            if (event != null) {
+                Bukkit.getPluginManager().callEvent(event);
+                try {
+                    message = (String) event.getClass().getMethod("getMessage").invoke(event);
+                    placeholders.putAll((Map<String, String>) event.getClass().getMethod("getPlaceholders").invoke(event));
+                } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException ignored) { }
             }
         }
+
+        for (Map.Entry<String, String> entry : placeholders.entrySet()) {
+            message = message.replace(entry.getKey(), entry.getValue());
+        }
+
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 

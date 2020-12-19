@@ -302,9 +302,7 @@ public class ItemBuilder {
         } catch (Exception e) {
             try {
                 return super.clone();
-            } catch (CloneNotSupportedException e1) {
-                e1.printStackTrace();
-            }
+            } catch (CloneNotSupportedException ignored) { }
         }
         return null;
     }

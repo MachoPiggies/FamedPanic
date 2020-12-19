@@ -73,11 +73,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7</version>
-            <scope>provided</scope>
+            <groupId>com.github.MachoPiggies</groupId>
+            <artifactId>FamedPanicAPI</artifactId>
+            <version>3bf6a3ca</version>
         </dependency>
     </dependencies>
-
 </project>

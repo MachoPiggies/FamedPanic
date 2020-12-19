@@ -1,11 +1,10 @@
 package com.machopiggies.famedpanic.commands;
 
 import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.managers.PanicInspectorManager;
+import com.machopiggies.famedpanic.managers.InspectorData;
 import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -16,10 +15,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ForceInspectorCancelCommand extends CommandManager {
+public class PanicInspectorResetCommand extends CommandManager {
 
-    public ForceInspectorCancelCommand() {
-        super("panicfic", "The reset command for the inspector", "famedpanic.inspector.forcecancel", "/panicfic [player]", "pfic");
+    public PanicInspectorResetCommand() {
+        super("panicinspectorreset", "The reset command for the inspector", "famedpanic.inspector", "/panicinspectorreset [player]", "pir");
     }
 
     @Override
@@ -40,9 +39,15 @@ public class ForceInspectorCancelCommand extends CommandManager {
                 if (target == null || target.equals(sender)) {
                     if (sender instanceof Player) {
                         reset((Player) sender);
+                    } else {
+                        mustBePlayer(sender);
                     }
                 } else {
-                    reset(target);
+                    if (permissable(sender, "famedpanic.inspector.resetothers")) {
+                        reset(target);
+                    } else {
+                        Message.send(sender, Message.msgs.noPermission);
+                    }
                 }
             } else {
                 Message.send(sender, Message.msgs.inspectorDisabled);
@@ -66,13 +71,14 @@ public class ForceInspectorCancelCommand extends CommandManager {
     }
 
     private void reset(Player player) {
-        PanicInspectorManager.InspectorData data;
+        InspectorData data;
         if ((data = Core.getPanicInspectorManager().getInspectors().get(player)) != null && data.player.equals(player)) {
             player.teleport(data.origin);
             player.setGameMode(data.gamemode);
+        } else {
+            player.teleport(player.getWorld().getSpawnLocation());
+            player.setGameMode(player.getServer().getDefaultGameMode());
         }
-        player.teleport(player.getWorld().getSpawnLocation());
-        player.setGameMode(player.getServer().getDefaultGameMode());
         Core.getPanicInspectorManager().getInspectors().remove(player);
     }
 }

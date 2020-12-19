@@ -1,4 +1,5 @@
 safemode: false #THIS MAY BE CHANGED BY THE PLUGIN - When true, panic alerts will not be sent to other services such as discord or slack
+debug: false #This prints plugin operations for the developers to see where a version may be going wrong in sensitive areas
 
 settings:
   bungee: false #If your server has anything to do with bungeecord, this being true will give you more placeholders
@@ -37,8 +38,18 @@ panic:
     stopDamagee: true #Stops player from being able to take damage
   stopCommands: #Stops player being able to use any of the following commands (WILL NOT STOP BUNGEE COMMANDS)
     - disabledcommandhere
-  stopChat: false #Stops player being able to talk
 
 title:
   title: '&c&lPANIC'
   subtitle: '&eA staff member will be with you shortly!'
+
+api:
+  enabled: false # When false, all API calls will be blocked
+  canAccessTokens: false # When false, plugins will not be able to get your discord/slack authorisation settings
+  canChangeSafemode: false  # When false, plugins will not be able to change safemode status
+  canChangePanicking: false # When false, plugins will not be able to add or remove panicking players
+  canChangeInspector: false # When false, plugins will not be able to change settings relating to the inspector
+
+errors:
+  deleteOldErrors: true # Deletes old error logs to stop too much storage being used
+  daysUntilDeletion: 5 # Old logs will be deleted after this amount of days

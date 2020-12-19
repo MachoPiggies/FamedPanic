@@ -2,38 +2,28 @@ package com.machopiggies.famedpanic;
 
 import com.machopiggies.famedpanic.commands.CommandManager;
 import com.machopiggies.famedpanic.gui.GuiManager;
+import com.machopiggies.famedpanic.managers.APIManager;
 import com.machopiggies.famedpanic.managers.ContactManager;
 import com.machopiggies.famedpanic.managers.PanicInspectorManager;
 import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.observer.EventListenerUtil;
 import com.machopiggies.famedpanic.observer.Observer;
-import com.machopiggies.famedpanic.observer.ObserverUtil;
 import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Logger;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Core extends JavaPlugin {
 
     private static Core core;
-    private static boolean vaultInc;
+    private static Plugin api;
     private static List<Observer> observers;
-
-    private static Permission perms = null;
-    public static Permission getPerms() {
-        return perms;
-    }
-
-    public static boolean isVaultInc() {
-        return vaultInc;
-    }
 
     private static PanicManager panicManager;
     public static PanicManager getPanicManager() {
@@ -60,52 +50,68 @@ public class Core extends JavaPlugin {
         return guiManager;
     }
 
+    private static APIManager apiManager;
+    public static APIManager getApiManager() {
+        return apiManager;
+    }
+
     @Override
     public void onEnable() {
         core = this;
 
-        Plugin vault;
-        if ((vault = Bukkit.getPluginManager().getPlugin("Vault")) != null) {
-            Logger.debug(vault.getDescription().getName() + " v" + vault.getDescription().getVersion() + " found! Initializing with Vault.");
-            vaultInc = true;
-        } else {
-            Logger.debug("Vault not found, ignoring...");
-        }
-
-        if (vaultInc) {
-            RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
-            perms = rsp.getProvider();
-        }
-
         Config.initialize();
         EventListener.intialize();
 
-        ObserverUtil.activate(this, (observers = Arrays.asList(
+        if ((api = Bukkit.getPluginManager().getPlugin("FamedPanicAPI")) != null) {
+            Logger.debug(api.getDescription().getName() + " v" + api.getDescription().getVersion() + " found! Attempting to load with API...");
+        } else {
+            Logger.debug("API not found. Loading as standalone...");
+        }
+
+        Observer.activate(this, (observers = Arrays.asList(
                 panicManager = new PanicManager(),
                 contactManager = new ContactManager(),
                 eventListenerUtil = new EventListenerUtil(),
                 panicInspectorManager = new PanicInspectorManager(),
                 guiManager = new GuiManager()
         )));
+
+        if (api != null) {
+            if (Config.getConfig().getBoolean("api.enabled")) {
+                Observer.activate(this, Collections.singletonList(apiManager = new APIManager(api)));
+                Logger.debug(api.getDescription().getName() + " v" + api.getDescription().getVersion() + " loaded successfully!");
+            } else {
+                Bukkit.getPluginManager().disablePlugin(api);
+                Logger.debug(api.getDescription().getName() + " v" + api.getDescription().getVersion() + " has been disabled due to API usage being turned off! Loading as standalone...");
+            }
+        }
+
         eventListenerUtil.registerListeners(this);
         CommandManager.activateCmds(this);
     }
 
     @Override
     public void onDisable() {
-        panicManager.emergencyResetAll();
-        panicInspectorManager.emergencyResetAll();
+        try {
+            panicManager.emergencyResetAll();
+            panicInspectorManager.emergencyResetAll();
+        } catch (Exception ignored) { }
 
-        ObserverUtil.deactivate(observers);
+        Observer.deactivate(observers);
         panicManager = null;
         contactManager = null;
         eventListenerUtil = null;
         panicInspectorManager = null;
         guiManager = null;
+        apiManager = null;
         core = null;
     }
 
     public static Core getPlugin() {
         return core;
+    }
+
+    public static Plugin getApi() {
+        return api;
     }
 }

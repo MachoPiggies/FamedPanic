@@ -13,7 +13,7 @@
         },
         {
           "name": "Display Name",
-          "value": "{%PLAYER_DISPLAY_NAME%}"
+          "value": "{%PLAYER_DISPLAYNAME%}"
         },
         {
           "name": "Server (Bungee)",

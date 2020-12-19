@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class CancelPanicCommand extends CommandManager {
 
     public CancelPanicCommand() {
-        super("cancelpanic", "Allows player to cancel another players panic", "famedpanic.panic.cancel", "/cp");
+        super("cancelpanic", "Allows player to cancel another players panic", "famedpanic.panic.cancel", "/cancelpanic <player>", "cp");
     }
 
     @Override

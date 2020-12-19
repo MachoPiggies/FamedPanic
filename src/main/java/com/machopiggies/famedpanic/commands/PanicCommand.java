@@ -1,12 +1,10 @@
 package com.machopiggies.famedpanic.commands;
 
 import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.managers.PanicData;
-import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.util.Config;
-import com.machopiggies.famedpanic.util.Logger;
 import com.machopiggies.famedpanic.util.Message;
 import com.machopiggies.famedpanic.util.TimeDateUtil;
+import com.machopiggies.famedpanic.managers.PanicData;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

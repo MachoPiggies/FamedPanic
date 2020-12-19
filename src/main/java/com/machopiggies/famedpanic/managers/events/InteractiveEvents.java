@@ -1,7 +1,6 @@
 package com.machopiggies.famedpanic.managers.events;
 
 import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.observer.EventListener;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.Material;

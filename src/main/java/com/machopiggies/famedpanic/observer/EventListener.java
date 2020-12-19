@@ -3,15 +3,11 @@ package com.machopiggies.famedpanic.observer;
 import com.machopiggies.famedpanic.commands.CommandManager;
 import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Message;
-import com.machopiggies.famedpanic.util.PacketManager;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.SimpleCommandMap;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public abstract class EventListener extends Observer {
 
@@ -45,8 +41,7 @@ public abstract class EventListener extends Observer {
                 Config.getConfig().getBoolean("panic.interaction.stopWorldInteraction", true),
                 Config.getConfig().getBoolean("panic.combat.stopDamager", true),
                 Config.getConfig().getBoolean("panic.combat.stopDamagee", true),
-                commands,
-                Config.getConfig().getBoolean("panic.stopChat", true)
+                commands
         );
     }
 
@@ -60,13 +55,11 @@ public abstract class EventListener extends Observer {
         public boolean stopDamager;
         public boolean stopDamagee;
         public List<Command> stopCommands;
-        public boolean stopChat;
 
         public ActionPreferences(boolean disableMovement,
                                  boolean stopOpening, boolean stopDropping, boolean stopPickup,
                                  boolean stopInventoryMoving, boolean stopWorldInteraction,
-                                 boolean stopDamager, boolean stopDamagee, List<Command> stopCommands,
-                                 boolean stopChat) {
+                                 boolean stopDamager, boolean stopDamagee, List<Command> stopCommands) {
             this.disableMovement = disableMovement;
             this.stopOpening = stopOpening;
             this.stopDropping = stopDropping;
@@ -76,7 +69,6 @@ public abstract class EventListener extends Observer {
             this.stopDamager = stopDamager;
             this.stopDamagee = stopDamagee;
             this.stopCommands = stopCommands;
-            this.stopChat = stopChat;
         }
     }
 }

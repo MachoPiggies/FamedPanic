@@ -3,12 +3,8 @@ package com.machopiggies.famedpanic.util;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.apache.commons.lang.ObjectUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -90,14 +86,16 @@ public class HTTPRequest {
                         return null;
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    File file = Logger.createErrorLog(e, "http error");
+                    Logger.severe("An error occurred whilst trying to make a HTTP request. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
                     return null;
                 }
             } else {
                 return null;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            File file = Logger.createErrorLog(e, "http error");
+            Logger.severe("An error occurred whilst trying to make a HTTP request. Please contact the plugin developer with the following log. [Created error log at " + file.getPath() + "]");
         }
         return null;
     }

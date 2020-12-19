@@ -1,6 +1,5 @@
 package com.machopiggies.famedpanic.managers;
 
-import com.google.gson.JsonObject;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -32,16 +31,12 @@ public class PanicData {
         settings = new Settings();
     }
 
-    public PanicData(UUID uuid, long time, Location location, float speed, float flyspeed, boolean flying, boolean allowedFlying) {
+    public PanicData(Player player, UUID uuid, long time, Location location, Settings settings) {
+        this.player = player;
         this.uuid = uuid;
         this.time = time;
         this.location = location;
-        this.settings = new Settings(
-                speed,
-                flyspeed,
-                flying,
-                allowedFlying
-        );
+        this.settings = settings;
     }
 
     public static class Settings {

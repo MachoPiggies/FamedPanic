@@ -1,8 +1,5 @@
 package com.machopiggies.famedpanic.util;
 
-import org.bukkit.Location;
-import org.bukkit.util.Vector;
-
 public class MathUtil {
 
     public static double round(double value, int places) {

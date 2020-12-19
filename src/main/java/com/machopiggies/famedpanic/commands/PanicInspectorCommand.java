@@ -1,25 +1,22 @@
 package com.machopiggies.famedpanic.commands;
 
 import com.machopiggies.famedpanic.Core;
+import com.machopiggies.famedpanic.managers.InspectorData;
 import com.machopiggies.famedpanic.managers.PanicInspectorManager;
 import com.machopiggies.famedpanic.util.Config;
-import com.machopiggies.famedpanic.util.Logger;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.StringUtil;
-import sun.rmi.runtime.Log;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class PanicInspectorCommand extends CommandManager {
     public PanicInspectorCommand() {
-        super("panicinspector", "Allows a player to enter panic inspector mode", "famedpanic.panicinspector", "/panicinspector <player>", "pi");
+        super("panicinspector", "Allows a player to enter panic inspector mode", "famedpanic.inspector", "/panicinspector <player>", "pi");
     }
 
     @Override
@@ -45,7 +42,7 @@ public class PanicInspectorCommand extends CommandManager {
                             }
                             if (target != null) {
                                 if (Core.getPanicManager().panicking(target)) {
-                                    PanicInspectorManager.InspectorData data = new PanicInspectorManager.InspectorData(player, target);
+                                    InspectorData data = new InspectorData(player, target);
                                     Core.getPanicInspectorManager().addInspector(player, data);
                                 } else {
                                     Map<String, String> map = new HashMap<>();

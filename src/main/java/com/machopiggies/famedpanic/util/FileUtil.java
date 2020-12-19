@@ -1,7 +1,5 @@
 package com.machopiggies.famedpanic.util;
 
-import com.google.gson.JsonObject;
-import com.machopiggies.famedpanic.Core;
 import org.apache.commons.io.IOUtils;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -35,8 +33,8 @@ public class FileUtil {
                         Logger.debug("Created '" + file.getName() + "' successfully!");
                     }
                 } catch (IOException e) {
-                    Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer via DM with the below stack trace!");
-                    e.printStackTrace();
+                    File file1 = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file1.getPath() + "]");
                 }
 
                 YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
@@ -47,8 +45,8 @@ public class FileUtil {
                 try {
                     yml.save(file);
                 } catch (IOException e) {
-                    Logger.severe("An error occurred whilst trying to save '" + file.getName() + "' after creation which means it has not loaded properly. If deleting the file and restarting your server does not fix this, please contact the plugin developer via DM!");
-                    e.printStackTrace();
+                    File file1 = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to save '" + file.getName() + "' after creation which means it has not loaded properly. If deleting the file and restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file1.getPath() + "]");
                 }
             } else {
                 YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
@@ -61,8 +59,8 @@ public class FileUtil {
                 try {
                     yml.save(file);
                 } catch (IOException e) {
-                    Logger.severe("An error occurred whilst trying to save '" + file.getName() + "' after creation which means it has not loaded properly. If deleting the file and restarting your server does not fix this, please contact the plugin developer via DM!");
-                    e.printStackTrace();
+                    File file1 = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to save '" + file.getName() + "' after creation which means it has not loaded properly. If deleting the file and restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file1.getPath() + "]");
                 }
             }
             return file;
@@ -86,8 +84,8 @@ public class FileUtil {
                     OutputStream outputStream = new FileOutputStream(file);
                     IOUtils.copy(resource, outputStream);
                 } catch (IOException e) {
-                    Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer via DM with the below stack trace!");
-                    e.printStackTrace();
+                    File file1 = Logger.createErrorLog(e, "json parse error");
+                    Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file1.getPath() + "]");
                 }
             }
             return file;
@@ -107,8 +105,8 @@ public class FileUtil {
                     Logger.debug("Created '" + file.getName() + "' successfully!");
                 }
             } catch (IOException e) {
-                Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer via DM with the below stack trace!");
-                e.printStackTrace();
+                File file1 = Logger.createErrorLog(e, "json parse error");
+                Logger.severe("An error occurred whilst trying to create '" + file.getName() + "'. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file1.getPath() + "]");
             }
         }
         return file;

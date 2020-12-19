@@ -7,11 +7,16 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.scheduler.BukkitTask;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.util.*;
 
@@ -57,6 +62,38 @@ public class PanicManager extends Observer {
     }
 
     public void protect(PanicData data) {
+        if (Core.getApi() != null) {
+            Event event = null;
+            try {
+                Constructor<?> settingsConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.PanicData$Settings")).getConstructor(float.class, float.class, boolean.class, boolean.class);
+                Object settingsObj = settingsConst.newInstance(data.settings.speed, data.settings.flyspeed, data.settings.flying, data.settings.allowedFlying);
+
+                Constructor<?> dataConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.PanicData")).getConstructor(Player.class, UUID.class, long.class, Location.class, Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.PanicData$Settings")));
+                Object dataObj = dataConst.newInstance(data.player, data.uuid, data.time, data.location, settingsObj);
+
+                Constructor<?> eventConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerPanicEvent")).getConstructor(Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.PanicData")));
+                event = (Event) eventConst.newInstance(dataObj);
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                File file = Logger.createErrorLog(e, "inspector enter api error");
+                Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+            }
+            if (event != null) {
+                Bukkit.getPluginManager().callEvent(event);
+                try {
+                    if ((boolean) event.getClass().getMethod("isCancelled").invoke(event)) {
+                        if (Core.getApiManager().apiSettings.enabled && Core.getApiManager().apiSettings.canChangePanicking) {
+                            return;
+                        } else {
+                            Logger.severe("Api tried to change panic status of a player when setting is disabled in config.yml");
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    File file = Logger.createErrorLog(e, "panic enter api error");
+                    Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                }
+            }
+        }
+
         panicking.add(data);
         if (!Config.isSafemode()) {
             Core.getContactManager().enterAnnounce(data);
@@ -71,6 +108,32 @@ public class PanicManager extends Observer {
 
     @Deprecated
     public void unprotect(PanicData data, CommandSender remover) {
+        if (Core.getApi() != null) {
+            Event event = null;
+            try {
+                Constructor<?> eventConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerUnpanicEvent")).getConstructor(Player.class, CommandSender.class);
+                event = (Event) eventConst.newInstance(data.player, remover);
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                File file = Logger.createErrorLog(e, "panic leave api error");
+                Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+            }
+            if (event != null) {
+                Bukkit.getPluginManager().callEvent(event);
+                try {
+                    if ((boolean) event.getClass().getMethod("isCancelled").invoke(event)) {
+                        if (Core.getApiManager().apiSettings.enabled && Core.getApiManager().apiSettings.canChangePanicking) {
+                            return;
+                        } else {
+                            Logger.severe("Api tried to change panic status of a player when setting is disabled in config.yml");
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    File file = Logger.createErrorLog(e, "panic enter api error");
+                    Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                }
+            }
+        }
+
         panicking.remove(data);
         if (!Config.isSafemode()) {
             Core.getContactManager().exitAnnounce(data);
@@ -89,7 +152,7 @@ public class PanicManager extends Observer {
         data.player.setAllowFlight(data.settings.allowedFlying);
 
         if (Config.settings.panicInspector.enabled) {
-            for (PanicInspectorManager.InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
+            for (InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
                 if (inspector.target.equals(data.player)) {
                     if (Core.getPanicInspectorManager().isInspector(inspector.player)) {
                         Core.getPanicInspectorManager().removeInspector(inspector.player, inspector, PanicInspectorManager.RemoveReason.PANIC_CANCELLED);
@@ -100,6 +163,32 @@ public class PanicManager extends Observer {
     }
 
     public void unprotect(Player player, CommandSender remover) {
+        if (Core.getApi() != null) {
+            Event event = null;
+            try {
+                Constructor<?> eventConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerUnpanicEvent")).getConstructor(Player.class, CommandSender.class);
+                event = (Event) eventConst.newInstance(player, remover);
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                File file = Logger.createErrorLog(e, "panic leave api error");
+                Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+            }
+            if (event != null) {
+                Bukkit.getPluginManager().callEvent(event);
+                try {
+                    if ((boolean) event.getClass().getMethod("isCancelled").invoke(event)) {
+                        if (Core.getApiManager().apiSettings.enabled && Core.getApiManager().apiSettings.canChangePanicking) {
+                            return;
+                        } else {
+                            Logger.severe("Api tried to change panic status of a player when setting is disabled in config.yml");
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    File file = Logger.createErrorLog(e, "panic enter api error");
+                    Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                }
+            }
+        }
+
         PanicData data = null;
         for (PanicData dat : panicking) {
             if (dat.player.equals(player)) {
@@ -125,7 +214,7 @@ public class PanicManager extends Observer {
         data.player.setAllowFlight(data.settings.allowedFlying);
 
         if (Config.settings.panicInspector.enabled) {
-            for (PanicInspectorManager.InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
+            for (InspectorData inspector : Core.getPanicInspectorManager().getInspectors().values()) {
                 if (inspector.target.equals(data.player)) {
                     if (Core.getPanicInspectorManager().isInspector(inspector.player)) {
                         if (remover != null) {
@@ -146,6 +235,10 @@ public class PanicManager extends Observer {
             entry.getValue().getSecond().cancel();
             cooldowns.remove(entry.getKey(), entry.getValue());
         }
+    }
+
+    public Set<PanicData> getPanicking() {
+        return panicking;
     }
 
     public boolean panicking(Player player) {

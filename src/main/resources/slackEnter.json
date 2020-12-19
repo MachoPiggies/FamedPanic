@@ -26,7 +26,7 @@
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "*Display Name*\n{PLAYER_DISPLAYNAME}"
+        "text": "*Display Name*\n{%PLAYER_DISPLAYNAME%}"
       }
     },
     {

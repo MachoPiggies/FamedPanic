@@ -1,13 +1,9 @@
 package com.machopiggies.famedpanic.commands;
 
-import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.managers.PanicData;
-import com.machopiggies.famedpanic.managers.PanicManager;
 import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
@@ -18,7 +14,7 @@ import java.util.List;
 public class SafemodeCommand extends CommandManager {
 
     public SafemodeCommand() {
-        super("psafemode", "Stops sending panic alerts to webhooks", "famedpanic.safemode", "/psafemode [on/off]", "psm");
+        super("panicsafemode", "Stops sending panic alerts to webhooks", "famedpanic.safemode", "/panicsafemode [on/off]", "psafemode", "psm");
     }
 
     @Override
@@ -27,18 +23,22 @@ public class SafemodeCommand extends CommandManager {
             if (args.length == 0) {
                 Message.send(sender, Config.isSafemode() ? Message.msgs.safemodeOn : Message.msgs.safemodeOff);
             } else if (args.length == 1) {
-                switch (args[0].toLowerCase()) {
-                    case "on":
-                        Config.setSafemode(true);
-                        Message.send(sender, Message.msgs.setSafemodeOn);
-                        break;
-                    case "off":
-                        Config.setSafemode(false);
-                        Message.send(sender, Message.msgs.setSafemodeOff);
-                        break;
-                    default:
-                        Message.send(sender, Config.isSafemode() ? Message.msgs.safemodeOn : Message.msgs.safemodeOff);
-                        break;
+                if (permissable(sender, "famedpanic.safemode.configure")) {
+                    switch (args[0].toLowerCase()) {
+                        case "on":
+                            Config.setSafemode(true);
+                            Message.send(sender, Message.msgs.setSafemodeOn);
+                            break;
+                        case "off":
+                            Config.setSafemode(false);
+                            Message.send(sender, Message.msgs.setSafemodeOff);
+                            break;
+                        default:
+                            Message.send(sender, Config.isSafemode() ? Message.msgs.safemodeOn : Message.msgs.safemodeOff);
+                            break;
+                    }
+                } else {
+                    Message.send(sender, Config.isSafemode() ? Message.msgs.safemodeOn : Message.msgs.safemodeOff);
                 }
             }
         } else {

@@ -3,12 +3,14 @@ package com.machopiggies.famedpanic.commands;
 import com.google.common.reflect.ClassPath;
 import com.machopiggies.famedpanic.Core;
 import com.machopiggies.famedpanic.observer.Observer;
+import com.machopiggies.famedpanic.util.Logger;
 import com.machopiggies.famedpanic.util.Message;
 import com.machopiggies.famedpanic.util.PacketManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.plugin.Plugin;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +54,8 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
 
                 executors.put(cmd, this);
             } catch(InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                e.printStackTrace();
+                File file = Logger.createErrorLog(e, "command creation error (" + command + ")");
+                Logger.severe("An error occurred whilst trying to load a command. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file.getPath() + "]");
             }
         }
     }
@@ -82,25 +85,26 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
 
     @SuppressWarnings({"beta", "UnstableApiUsage"})
     public static void activateCmds(Plugin plugin) {
-        ClassPath classPath;
-        try {
-            classPath = ClassPath.from(plugin.getClass().getClassLoader());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
         Package p = plugin.getClass().getPackage();
 
-        for (ClassPath.ClassInfo info : classPath.getTopLevelClassesRecursive(p.getName())) {
-            Class<?> clss = info.load();
-            if (CommandManager.class.equals(clss.getSuperclass())) {
-                try {
-                    clss.getDeclaredConstructor().newInstance();
-                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                    e.printStackTrace();
+        try {
+            ClassPath classPath = ClassPath.from(plugin.getClass().getClassLoader());
+            for (ClassPath.ClassInfo info : classPath.getTopLevelClassesRecursive(p.getName())) {
+                Class<?> clss = info.load();
+                if (CommandManager.class.equals(clss.getSuperclass())) {
+                    try {
+                        clss.getDeclaredConstructor().newInstance();
+                    } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                        File file = Logger.createErrorLog(e, "command instantiation error");
+                        Logger.severe("An error occurred whilst trying to get a command which means some of its functionality has been lost. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file.getPath() + "]");
+                        Bukkit.getPluginManager().disablePlugin(Core.getPlugin());
+                    }
                 }
             }
+        } catch (IOException e) {
+            File file = Logger.createErrorLog(e, "classpath not found");
+            Logger.severe("A critical error has occurred and as such, some of the commands in the plugin have lost functionality. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file.getPath() + "]");
+            Bukkit.getPluginManager().disablePlugin(Core.getPlugin());
         }
     }
 
@@ -114,7 +118,8 @@ public class CommandManager extends Observer implements CommandExecutor, TabComp
             Object cserver = Objects.requireNonNull(PacketManager.getClassNMS("CraftServer", PacketManager.NMSType.CRAFTBUKKIT)).cast(Bukkit.getServer());
             commands = (SimpleCommandMap) cserver.getClass().getMethod("getCommandMap").invoke(cserver);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-            e.printStackTrace();
+            File file = Logger.createErrorLog(e, "commandmap unreachable");
+            Logger.severe("An error occurred whilst trying to get commandmap. If restarting your server does not fix this, please contact the plugin developer with the following error log! [Created error log at " + file.getPath() + "]");
         }
         return commands;
     }

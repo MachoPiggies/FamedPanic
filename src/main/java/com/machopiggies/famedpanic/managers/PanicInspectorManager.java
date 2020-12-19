@@ -7,10 +7,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 
-import java.time.Instant;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class PanicInspectorManager extends Observer {
@@ -43,6 +47,35 @@ public class PanicInspectorManager extends Observer {
     }
 
     public void addInspector(Player player, InspectorData data) {
+        if (Core.getApi() != null) {
+            Event event = null;
+            try {
+                Constructor<?> dataConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.InspectorData").getConstructor(Player.class, Player.class, Location.class, GameMode.class, long.class));
+                Object dataObj = dataConst.newInstance(data.player, data.target, data.origin, data.gamemode, data.time);
+
+                Constructor<?> eventConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerInspectorEnterEvent")).getConstructor(Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.InspectorData")));
+                event = (Event) eventConst.newInstance(dataObj);
+            } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                File file = Logger.createErrorLog(e, "inspector enter api error");
+                Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+            }
+            if (event != null) {
+                Bukkit.getPluginManager().callEvent(event);
+                try {
+                    if ((boolean) event.getClass().getMethod("isCancelled").invoke(event)) {
+                        if (Core.getApiManager().apiSettings.enabled && Core.getApiManager().apiSettings.canChangeInspector) {
+                            return;
+                        } else {
+                            Logger.severe("Api tried to change inspector status of a player when setting is disabled in config.yml");
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    File file = Logger.createErrorLog(e, "inspector enter api error");
+                    Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                }
+            }
+        }
+
         inspectors.put(player, data);
         player.performCommand(Config.settings.panicInspector.vanishCmd);
         player.setGameMode(GameMode.SPECTATOR);
@@ -60,16 +93,48 @@ public class PanicInspectorManager extends Observer {
     public void removeInspector(Player player, InspectorData data, RemoveReason reason) {
         switch (reason) {
             case PANIC_CANCELLED:
-                if (Config.settings.panicInspector.kickDelay > 0) {
+                int kickDelay = Config.settings.panicInspector.kickDelay;
+                if (Core.getApi() != null) {
+                    Event event = null;
+                    try {
+                        Constructor<?> dataConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.InspectorData").getConstructor(Player.class, Player.class, Location.class, GameMode.class, long.class));
+                        Object dataObj = dataConst.newInstance(data.player, data.target, data.origin, data.gamemode, data.time);
+
+                        Constructor<?> eventConst = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerInspectorLeaveEvent")).getConstructor(Player.class, Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.misc.InspectorData")), int.class, int.class);
+                        event = (Event) eventConst.newInstance(player, dataObj, reason.ordinal(), kickDelay);
+                    } catch (InstantiationException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        File file = Logger.createErrorLog(e, "inspector leave api error");
+                        Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                    }
+                    if (event != null) {
+                        Bukkit.getPluginManager().callEvent(event);
+                        try {
+                            Object casted = Objects.requireNonNull(Class.forName("com.machopiggies.famedpanicapi.events.PlayerInspectorLeaveEvent")).cast(event);
+                            int newKickDelay = (int) casted.getClass().getMethod("getDelay").invoke(casted);
+                            if (newKickDelay != kickDelay) {
+                                if (Core.getApiManager().apiSettings.enabled && Core.getApiManager().apiSettings.canChangeInspector) {
+                                    kickDelay = newKickDelay;
+                                } else {
+                                    Logger.severe("Api tried to change inspector status of a player when setting is disabled in config.yml");
+                                }
+                            }
+                        } catch (NoSuchMethodException | ClassNotFoundException | IllegalAccessException | InvocationTargetException e) {
+                            File file = Logger.createErrorLog(e, "inspector leave api error");
+                            Logger.severe("An error occurred whilst making an API event, this should not cause any issues with your server, but may still need to be reported to the plugin developer as it may break other plugins. [Created error log at " + file.getPath() + "]");
+                        }
+                    }
+                }
+
+                if (kickDelay > 0) {
                     Map<String, String> map = new HashMap<>();
                     map.put("{%TARGET_NAME%}", data.target.getName());
                     map.put("{%TARGET_DISPLAYNAME%}", data.target.getDisplayName());
-                    map.put("{%INSPECTOR_KICK_DELAY%}", TimeDateUtil.getSimpleDurationStringFromSeconds(Config.settings.panicInspector.kickDelay));
+                    map.put("{%INSPECTOR_KICK_DELAY%}", TimeDateUtil.getSimpleDurationStringFromSeconds(kickDelay));
                     RepeatingTask rt = new RepeatingTask();
                     rt.setTask(Bukkit.getScheduler().runTaskLater(Core.getPlugin(), () -> {
                             remove(player, data, Message.msgs.inspectorLeave);
                             removing.remove(player, rt);
-                    }, Config.settings.panicInspector.kickDelay * 20));
+                    }, kickDelay * 20L));
                     removing.put(player, rt);
                     Message.send(player, Message.msgs.inspectorKick, map);
                 } else {
@@ -96,23 +161,8 @@ public class PanicInspectorManager extends Observer {
         return inspectors;
     }
 
-    public static class InspectorData {
-        public Player player;
-        public Player target;
-        public Location origin;
-        public GameMode gamemode;
-        public Long time;
-
-        public InspectorData(Player player, Player target) {
-            this.player = player;
-            this.target = target;
-            origin = player.getLocation();
-            gamemode = player.getGameMode();
-            time = Instant.now().getEpochSecond();
-        }
-    }
-
     private void remove(Player player, InspectorData data, String message, Map<String, String> placeholders) {
+
         if (player.hasMetadata("panickinspector")) {
             player.removeMetadata("panickinspector", Core.getPlugin());
         }

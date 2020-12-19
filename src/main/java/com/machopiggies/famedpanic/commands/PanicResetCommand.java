@@ -1,18 +1,15 @@
 package com.machopiggies.famedpanic.commands;
 
 import com.machopiggies.famedpanic.Core;
-import com.machopiggies.famedpanic.util.Config;
 import com.machopiggies.famedpanic.util.Message;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -69,5 +66,8 @@ public class PanicResetCommand extends CommandManager {
     private void reset(Player player) {
         player.setWalkSpeed(0.2f);
         player.setFlySpeed(0.1f);
+        player.setFlying(false);
+        player.setAllowFlight(false);
+        player.setFallDistance(0);
     }
 }
